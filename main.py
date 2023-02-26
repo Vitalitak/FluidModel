@@ -1,4 +1,5 @@
 import math as m
+import matplotlib.pyplot as plt
 import numpy as np
 
 """
@@ -129,9 +130,9 @@ def main():
     ni_2 = continuity(u, ni, boxsize, dt)
     ni = ni_2
 
-    print(V)
+    plot(V)
     print(u)
-    print(ni)
+    #print(ni)
 
 
     return 0
