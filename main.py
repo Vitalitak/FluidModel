@@ -132,7 +132,9 @@ def main():
 
     plt.plot(V)
     plt.show()
-    print(u)
+
+    plt.plot(u)
+    plt.show()
     #print(ni)
 
 
