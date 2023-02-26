@@ -39,9 +39,10 @@ def Pois(ne, ni, Ve, boxsize):
     return V
 
 def momentum(V, uprev, boxsize, dt):
+
     """
-        sweep method solution of momentum conservation equation
-        """
+    sweep method solution of momentum conservation equation
+    """
 
     Nx = len(V)
     dx = boxsize / Nx
@@ -114,6 +115,24 @@ def main():
 
     # initialisation of parameters
     boxsize = 500
+    dt = 1
+    Nx = 10000
+
+    V = [0 for k in range(0, Nx)]
+    ne = [0 for k in range(0, Nx)]
+    ni = [1 for k in range(0, Nx)]
+    u = [0 for k in range(0, Nx)]
+
+    V = Pois(ne, ni, 0, boxsize)
+    u_2 = momentum(V, u, boxsize, dt)
+    u = u_2
+    ni_2 = continuity(u, ni, boxsize, dt)
+    ni = ni_2
+
+    print(V)
+    print(u)
+    print(ni)
+
 
     return 0
 
