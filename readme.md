@@ -4,7 +4,7 @@ Electrode potential in equivalent circuit model
 
 First block:
     \
-    Self-consistent solution of Poisson equation, electrons and ions momentum conservation, and
+    Self-consistent solution of Poisson equation, electrons and ions momentum balance, and
     electron and ion continuity equation
 
 Second block:
