@@ -42,7 +42,7 @@ def Pois(ne, ni, Ve, boxsize):
 def momentum(V, uprev, boxsize, dt):
 
     """
-    sweep method solution of momentum conservation equation
+    sweep method solution of momentum balance equation
     """
 
     Nx = len(V)
@@ -107,7 +107,7 @@ def main():
 
     """
     First block:
-    self-consistent solution of Poisson equation, electrons and ions momentum conservation, and
+    self-consistent solution of Poisson equation, electrons and ions momentum balance, and
     electron and ion continuity equation
 
     Second block:
