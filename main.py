@@ -120,20 +120,21 @@ def main():
     """
 
     # initialisation of parameters
-    boxsize = 500
+    boxsize = 1000
     dt = 0.01
-    Nx = 10000
+    Nx = 1000
+    t = 0.04
 
+    Nt = int(t/dt)
     V = [0 for k in range(0, Nx)]
     ne = [0 for k in range(0, Nx)]
     ni = [1 for k in range(0, Nx)]
     u = [0 for k in range(0, Nx)]
 
-    V = Pois(ne, ni, 0, boxsize)
-    u_2 = momentum(V, u, boxsize, dt)
-    u = u_2
-    ni_2 = continuity(u, ni, boxsize, dt)
-    ni = ni_2
+    for i in range(0, Nt):
+        V = Pois(ne, ni, 0, boxsize)
+        u = momentum(V, u, boxsize, dt)
+        ni = continuity(u, ni, boxsize, dt)
 
     plt.plot(V)
     plt.show()
