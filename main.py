@@ -61,8 +61,11 @@ def momentum(V, uprev, boxsize, dt):
         a[i] = uprev[i+1] / 4.0 / dx / (-1 / dt + uprev[i - 1] * a[i-1] / 4.0 / dx)
         b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i]-V[i-1])/dx - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
 
+    # boundary condition on plasma surface: (du/dx)p = 0
     a[Nx - 1] = 0
-    b[Nx - 1] = (-uprev[Nx-2] / 4.0 / dx * b[Nx-2] + (V[Nx-1]-V[Nx-2])/dx - uprev[Nx-1] / dt) / (-1 / dt + uprev[Nx-2] * a[Nx-2] / 4.0 / dx)  # boundary conditions for u (u[Nx-1]-u[Nx-2])
+    #b[Nx - 1] = (-uprev[Nx-2] / 4.0 / dx * b[Nx-2] + (V[Nx-1]-V[Nx-2])/dx - uprev[Nx-1] / dt) / (-1 / dt + uprev[Nx-2] * a[Nx-2] / 4.0 / dx)  # boundary conditions for u (u[Nx-1]-u[Nx-2])
+    #b[Nx - 1] = 0  # (u)p = 0
+    b[Nx - 1] = b[Nx - 2]/(1 - a[Nx - 2])  # (du/dx)p = 0
 
     # backward
     u[Nx - 1] = b[Nx - 1]
@@ -93,8 +96,10 @@ def continuity(u, nprev, boxsize, dt):
         a[i] = u[i] / ((-1/dt-(u[i+1]-u[i])/dx) + u[i]/2.0/dx*a[i-1])
         b[i] = (-u[i]/2.0/dx*b[i-1]-nprev[i]/dt) / ((-1/dt-(u[i+1]-u[i])/dx) + u[i]/2.0/dx*a[i-1])
 
+    # boundary condition on plasma surface: np = np
     a[Nx - 1] = 0
-    b[Nx - 1] = (-u[Nx - 1]/2.0/dx*b[Nx-2]-nprev[Nx-1]/dt) / ((-1/dt-(u[Nx-1]-u[Nx-2])/dx) + u[Nx-1]/2.0/dx*a[Nx-2]) # boundary conditions for u (u[Nx-1]-u[Nx-2])
+    #b[Nx - 1] = (-u[Nx - 1]/2.0/dx*b[Nx-2]-nprev[Nx-1]/dt) / ((-1/dt-(u[Nx-1]-u[Nx-2])/dx) + u[Nx-1]/2.0/dx*a[Nx-2]) # boundary conditions for u (u[Nx-1]-u[Nx-2])
+    b[Nx - 1] = nprev[Nx - 1]  # np = np
 
     # backward
     n[Nx - 1] = b[Nx - 1]
@@ -116,7 +121,7 @@ def main():
 
     # initialisation of parameters
     boxsize = 500
-    dt = 1
+    dt = 0.01
     Nx = 10000
 
     V = [0 for k in range(0, Nx)]
@@ -134,6 +139,9 @@ def main():
     plt.show()
 
     plt.plot(u)
+    plt.show()
+
+    plt.plot(ni)
     plt.show()
     #print(ni)
 
