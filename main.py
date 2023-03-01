@@ -22,15 +22,20 @@ def Pois(ne, ni, Ve, boxsize):
     b = [0 for k in range(0, Nx)]
 
     # forward
-    a[0] = 0.5
-    b[0] = 0.5 * (ne[0] - ni[0]) * dx * dx
+    # boundary conditions on electrode surface: (V)e = Ve
+    #a[0] = 0.5
+    #b[0] = 0.5 * (ne[0] - ni[0]) * dx * dx
+    a[0] = 0
+    b[0] = Ve
 
     for i in range(1, Nx-1):
         a[i] = 1/ (2-a[i-1])
         b[i] = (b[i-1] - (ne[i] - ni[i]) * dx * dx)/(2-a[i-1])
 
+    # boundary condition on plasma surface: (V)p = 0
     a[Nx-1] = 0
-    b[Nx-1] = (b[Nx-2] - (ne[Nx-1] - ni[Nx-1]) * dx * dx)/(2-a[Nx-2])
+    #b[Nx-1] = (b[Nx-2] - (ne[Nx-1] - ni[Nx-1]) * dx * dx)/(2-a[Nx-2])
+    b[Nx-1] = 0
 
     # backward
     V[Nx-1] = b[Nx-1]
@@ -39,7 +44,7 @@ def Pois(ne, ni, Ve, boxsize):
 
     return V
 
-def momentum(V, uprev, boxsize, dt):
+def momentum(V, uprev, m, boxsize, dt):
 
     """
     sweep method solution of momentum balance equation
@@ -54,12 +59,13 @@ def momentum(V, uprev, boxsize, dt):
     b = [0 for k in range(0, Nx)]
 
     # forward
+    # boundary conditions on electrode surface:
     a[0] = -uprev[1] * dt / 4.0 / dx
-    b[0] = (V[1] - V[0])/dx - uprev[0]/dt
+    b[0] = (V[1] - V[0])/dx/m - uprev[0]/dt
 
     for i in range(1, Nx - 1):
         a[i] = uprev[i+1] / 4.0 / dx / (-1 / dt + uprev[i - 1] * a[i-1] / 4.0 / dx)
-        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i])/dx - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
+        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i])/dx/m - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
 
     # boundary condition on plasma surface: (du/dx)p = 0
     a[Nx - 1] = 0
@@ -74,7 +80,7 @@ def momentum(V, uprev, boxsize, dt):
 
     return u
 
-def continuity(u, nprev, boxsize, dt):
+def continuity(u, nprev, dn, boxsize, dt):
 
     """
     sweep method solution of continuity equation
@@ -89,17 +95,21 @@ def continuity(u, nprev, boxsize, dt):
     b = [0 for k in range(0, Nx)]
 
     # forward
-    a[0] = u[0] / (-1/dt-(u[1]-u[0])/dx)
-    b[0] = -nprev[0] / (-1-(u[1]-u[0])*dt/dx)
+    # boundary conditions on electrode surface: (dn/dt)e = 0
+    #a[0] = u[0] / (-1/dt-(u[1]-u[0])/dx)
+    #b[0] = -nprev[0] / (-1-(u[1]-u[0])*dt/dx)
+    a[0] = 0
+    b[0] = nprev[0]
 
     for i in range(1, Nx - 1):
         a[i] = u[i] / ((-1/dt-(u[i+1]-u[i])/dx) + u[i]/2.0/dx*a[i-1])
         b[i] = (-u[i]/2.0/dx*b[i-1]-nprev[i]/dt) / ((-1/dt-(u[i+1]-u[i])/dx) + u[i]/2.0/dx*a[i-1])
 
-    # boundary condition on plasma surface: np = np
+    # boundary condition on plasma surface: (dn/dt)p = 0
     a[Nx - 1] = 0
     #b[Nx - 1] = (-u[Nx - 1]/2.0/dx*b[Nx-2]-nprev[Nx-1]/dt) / ((-1/dt-(u[Nx-1]-u[Nx-2])/dx) + u[Nx-1]/2.0/dx*a[Nx-2]) # boundary conditions for u (u[Nx-1]-u[Nx-2])
-    b[Nx - 1] = nprev[Nx - 1]  # np = np
+    #b[Nx - 1] = nprev[Nx - 1] + dn  # (dn/dt)p = dn0/dt
+    b[Nx - 1] = nprev[Nx - 1]  # (n)p = np (dn/dt)p = 0
 
     # backward
     n[Nx - 1] = b[Nx - 1]
@@ -123,18 +133,27 @@ def main():
     boxsize = 1000
     dt = 0.01
     Nx = 1000
-    t = 0.04
+    tEnd = 0.5
+    dn = 1
+    me = 1
+    mi = 40
 
-    Nt = int(t/dt)
+    Nt = int(tEnd/dt)
     V = [0 for k in range(0, Nx)]
-    ne = [0 for k in range(0, Nx)]
+    ne = [1 for k in range(0, Nx)]
     ni = [1 for k in range(0, Nx)]
+    ue = [1 for k in range(0, Nx)]
     ui = [0 for k in range(0, Nx)]
+    Vrf = 1000
 
     for i in range(0, Nt):
-        V = Pois(ne, ni, 0, boxsize)
-        ui = momentum(V, ui, boxsize, dt)
-        ni = continuity(ui, ni, boxsize, dt)
+        t = i*dt
+        Ve = Vrf*np.sin(0.1356*t)
+        V = Pois(ne, ni, Ve, boxsize)
+        ue = momentum(V, ue, me, boxsize, dt)
+        ui = momentum(V, ui, mi, boxsize, dt)
+        ne = continuity(ue, ne, dn, boxsize, dt)
+        ni = continuity(ui, ni, dn, boxsize, dt)
 
     plt.plot(V)
     plt.show()
@@ -142,7 +161,7 @@ def main():
     plt.plot(ui)
     plt.show()
 
-    plt.plot(ni)
+    plt.plot(ne)
     plt.show()
     #print(ni)
 
