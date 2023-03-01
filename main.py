@@ -59,7 +59,7 @@ def momentum(V, uprev, boxsize, dt):
 
     for i in range(1, Nx - 1):
         a[i] = uprev[i+1] / 4.0 / dx / (-1 / dt + uprev[i - 1] * a[i-1] / 4.0 / dx)
-        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i]-V[i-1])/dx - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
+        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i])/dx - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
 
     # boundary condition on plasma surface: (du/dx)p = 0
     a[Nx - 1] = 0
@@ -129,17 +129,17 @@ def main():
     V = [0 for k in range(0, Nx)]
     ne = [0 for k in range(0, Nx)]
     ni = [1 for k in range(0, Nx)]
-    u = [0 for k in range(0, Nx)]
+    ui = [0 for k in range(0, Nx)]
 
     for i in range(0, Nt):
         V = Pois(ne, ni, 0, boxsize)
-        u = momentum(V, u, boxsize, dt)
-        ni = continuity(u, ni, boxsize, dt)
+        ui = momentum(V, ui, boxsize, dt)
+        ni = continuity(ui, ni, boxsize, dt)
 
     plt.plot(V)
     plt.show()
 
-    plt.plot(u)
+    plt.plot(ui)
     plt.show()
 
     plt.plot(ni)
