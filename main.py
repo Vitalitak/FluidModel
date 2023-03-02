@@ -141,7 +141,7 @@ def main():
     dne = 0.01
     dni = 0.001
     me = 1
-    mi = 40
+    mi = 70000
     C = 1.4E-16
     C /= 1.6E-19
 
@@ -150,7 +150,7 @@ def main():
     ne = [1 for k in range(0, Nx)]
     ni = [1 for k in range(0, Nx)]
     ue = [1 for k in range(0, Nx)]
-    ui = [0 for k in range(0, Nx)]
+    ui = [0.01 for k in range(0, Nx)]
     Vrf = 0
     Vdc = -10
 
@@ -158,7 +158,8 @@ def main():
         t = i*dt
         Ve = Vdc + Vrf * np.sin(0.01356*t)
         V = Pois(ne, ni, Ve, boxsize)
-        ue = momentum(V, ue, me, boxsize, dt)
+        Velectron = [i*-1 for i in V]
+        ue = momentum(Velectron, ue, me, boxsize, dt)
         ui = momentum(V, ui, mi, boxsize, dt)
         ne = continuity(ue, ne, dne, boxsize, dt)
         ni = continuity(ui, ni, dni, boxsize, dt)
@@ -169,9 +170,9 @@ def main():
     plt.show()
 
     plt.plot(ui,'r', ue, 'b')
-    plt.axis([-50, Nx+50,-2, 2])
+    plt.axis([-50, Nx+50,-2, 5])
     plt.ylabel('velocity')
-    plt.text(500, 1.5, r'red - ions, blue - electrons')
+    plt.text(500, 3.5, r'red - ions, blue - electrons')
     plt.show()
 
     plt.plot(ni, 'r', ne, 'b')
