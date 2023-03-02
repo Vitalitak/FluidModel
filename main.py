@@ -103,6 +103,7 @@ def continuity(u, nprev, dn, boxsize, dt):
     #b[0] = -nprev[0] / (-1-(u[1]-u[0])*dt/dx)
     a[0] = 0
     b[0] = nprev[0]
+    #b[0] = nprev[0] - dn
 
     for i in range(1, Nx - 1):
         a[i] = u[i] / ((-1/dt-(u[i+1]-u[i])/dx) + u[i]/2.0/dx*a[i-1])
@@ -136,8 +137,9 @@ def main():
     boxsize = 1000
     dt = 0.01
     Nx = 1000
-    tEnd = 1
-    dn = 1
+    tEnd = 10
+    dne = 0.01
+    dni = 0.001
     me = 1
     mi = 40
     C = 1.4E-16
@@ -149,7 +151,7 @@ def main():
     ni = [1 for k in range(0, Nx)]
     ue = [1 for k in range(0, Nx)]
     ui = [0 for k in range(0, Nx)]
-    Vrf = 100
+    Vrf = 0
     Vdc = -10
 
     for i in range(0, Nt):
@@ -158,8 +160,8 @@ def main():
         V = Pois(ne, ni, Ve, boxsize)
         ue = momentum(V, ue, me, boxsize, dt)
         ui = momentum(V, ui, mi, boxsize, dt)
-        ne = continuity(ue, ne, dn, boxsize, dt)
-        ni = continuity(ui, ni, dn, boxsize, dt)
+        ne = continuity(ue, ne, dne, boxsize, dt)
+        ni = continuity(ui, ni, dni, boxsize, dt)
         Vdc += (ni[0]*ui[0] - ne[0]*ue[0])*dt/C
 
     plt.plot(V)
