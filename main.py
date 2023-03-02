@@ -30,12 +30,13 @@ def Pois(ne, ni, Ve, boxsize):
 
     for i in range(1, Nx-1):
         a[i] = 1/ (2-a[i-1])
-        b[i] = (b[i-1] - (ne[i] - ni[i]) * dx * dx)/(2-a[i-1])
+        b[i] = (b[i-1] - (ne[i] - ni[i]) * dx * dx * 0.00018)/(2-a[i-1])
 
-    # boundary condition on plasma surface: (V)p = 0
+    # boundary condition on plasma surface: (dV/dx)p = 0
     a[Nx-1] = 0
     #b[Nx-1] = (b[Nx-2] - (ne[Nx-1] - ni[Nx-1]) * dx * dx)/(2-a[Nx-2])
-    b[Nx-1] = 0
+    #b[Nx-1] = 0  #  (V)p = 0
+    b[Nx - 1] = b[Nx - 2] / (1 - a[Nx - 2])  # (dV/dx)p = 0
 
     # backward
     V[Nx-1] = b[Nx-1]
@@ -133,7 +134,7 @@ def main():
     boxsize = 1000
     dt = 0.01
     Nx = 1000
-    tEnd = 0.5
+    tEnd = 1
     dn = 1
     me = 1
     mi = 40
@@ -145,10 +146,11 @@ def main():
     ue = [1 for k in range(0, Nx)]
     ui = [0 for k in range(0, Nx)]
     Vrf = 1000
+    Vdc = -10
 
     for i in range(0, Nt):
         t = i*dt
-        Ve = Vrf*np.sin(0.1356*t)
+        Ve = Vdc + Vrf*np.sin(0.01356*t)
         V = Pois(ne, ni, Ve, boxsize)
         ue = momentum(V, ue, me, boxsize, dt)
         ui = momentum(V, ui, mi, boxsize, dt)
@@ -156,12 +158,18 @@ def main():
         ni = continuity(ui, ni, dn, boxsize, dt)
 
     plt.plot(V)
+    plt.ylabel('V')
     plt.show()
 
-    plt.plot(ui)
+    plt.plot(ui,'r', ue, 'b')
+    plt.axis([-50, Nx+50,-20, 20])
+    plt.ylabel('velocity')
+    plt.text(500, 15, r'red - ions, blue - electrons')
     plt.show()
 
-    plt.plot(ne)
+    plt.plot(ni, 'r', ne, 'b')
+    plt.ylabel('concentration')
+    plt.text(500, 5, r'red - ions, blue - electrons')
     plt.show()
     #print(ni)
 
