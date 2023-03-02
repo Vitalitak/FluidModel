@@ -60,9 +60,11 @@ def momentum(V, uprev, m, boxsize, dt):
     b = [0 for k in range(0, Nx)]
 
     # forward
-    # boundary conditions on electrode surface:
-    a[0] = -uprev[1] * dt / 4.0 / dx
-    b[0] = (V[1] - V[0])/dx/m - uprev[0]/dt
+    # boundary conditions on electrode surface: (du/dx)e = 0
+    #a[0] = -uprev[1] * dt / 4.0 / dx
+    #b[0] = (V[1] - V[0])/dx/m - uprev[0]/dt
+    a[0] = 1
+    b[0] = 0
 
     for i in range(1, Nx - 1):
         a[i] = uprev[i+1] / 4.0 / dx / (-1 / dt + uprev[i - 1] * a[i-1] / 4.0 / dx)
@@ -138,6 +140,8 @@ def main():
     dn = 1
     me = 1
     mi = 40
+    C = 1.4E-16
+    C /= 1.6E-19
 
     Nt = int(tEnd/dt)
     V = [0 for k in range(0, Nx)]
@@ -145,31 +149,33 @@ def main():
     ni = [1 for k in range(0, Nx)]
     ue = [1 for k in range(0, Nx)]
     ui = [0 for k in range(0, Nx)]
-    Vrf = 1000
+    Vrf = 100
     Vdc = -10
 
     for i in range(0, Nt):
         t = i*dt
-        Ve = Vdc + Vrf*np.sin(0.01356*t)
+        Ve = Vdc + Vrf * np.sin(0.01356*t)
         V = Pois(ne, ni, Ve, boxsize)
         ue = momentum(V, ue, me, boxsize, dt)
         ui = momentum(V, ui, mi, boxsize, dt)
         ne = continuity(ue, ne, dn, boxsize, dt)
         ni = continuity(ui, ni, dn, boxsize, dt)
+        Vdc += (ni[0]*ui[0] - ne[0]*ue[0])*dt/C
 
     plt.plot(V)
     plt.ylabel('V')
     plt.show()
 
     plt.plot(ui,'r', ue, 'b')
-    plt.axis([-50, Nx+50,-20, 20])
+    plt.axis([-50, Nx+50,-2, 2])
     plt.ylabel('velocity')
-    plt.text(500, 15, r'red - ions, blue - electrons')
+    plt.text(500, 1.5, r'red - ions, blue - electrons')
     plt.show()
 
     plt.plot(ni, 'r', ne, 'b')
+    plt.axis([-50, Nx+50,-2, 2])
     plt.ylabel('concentration')
-    plt.text(500, 5, r'red - ions, blue - electrons')
+    plt.text(500, 0.5, r'red - ions, blue - electrons')
     plt.show()
     #print(ni)
 
