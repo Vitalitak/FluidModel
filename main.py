@@ -137,7 +137,7 @@ def main():
     boxsize = 1000
     dt = 0.01
     Nx = 1000
-    tEnd = 10
+    tEnd = 30
     dne = 0.01
     dni = 0.001
     me = 1
@@ -149,8 +149,8 @@ def main():
     V = [0 for k in range(0, Nx)]
     ne = [1 for k in range(0, Nx)]
     ni = [1 for k in range(0, Nx)]
-    ue = [1 for k in range(0, Nx)]
-    ui = [0.01 for k in range(0, Nx)]
+    ue = [0 for k in range(0, Nx)]
+    ui = [-0.01 for k in range(0, Nx)]
     Vrf = 0
     Vdc = -10
 
@@ -170,7 +170,7 @@ def main():
     plt.show()
 
     plt.plot(ui,'r', ue, 'b')
-    plt.axis([-50, Nx+50,-2, 5])
+    plt.axis([-50, Nx+50,-2, 2])
     plt.ylabel('velocity')
     plt.text(500, 3.5, r'red - ions, blue - electrons')
     plt.show()
