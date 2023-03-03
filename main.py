@@ -134,7 +134,7 @@ def dist_Bolt(V, np, Te):
     Nx = len(V)
     n = [0 for k in range(0, Nx)]
 
-    for i in range (0, Nx):
+    for i in range(0, Nx):
         n[i] = np * m.exp(V[i] / Te)
 
     return n
