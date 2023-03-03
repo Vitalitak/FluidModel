@@ -122,17 +122,17 @@ def continuity(u, nprev, dn, boxsize, dt):
 
     return n
 
-def dist_Bolt(V, boxsize):
+def dist_Bolt(V, np, Te):
 
     """
     Boltzmann distribution for electrons
     """
 
     Nx = len(V)
-    dx = boxsize / Nx
     n = [0 for k in range(0, Nx)]
 
-
+    for i in range (0, Nx):
+        n[i] = np * m.exp(V[i] / Te)
 
     return n
 
@@ -158,6 +158,9 @@ def main():
     mi = 70000
     C = 1.4E-16
     C /= 1.6E-19
+    Te = 2.3
+
+    #Te *= 1.7E12 / 9.1  # kT/me
 
     Nt = int(tEnd/dt)
     V = [0 for k in range(0, Nx)]
@@ -174,10 +177,12 @@ def main():
         V = Pois(ne, ni, Ve, boxsize)
         Velectron = [i*-1 for i in V]
         ue = momentum(Velectron, ue, me, boxsize, dt)
+        #ue[0] = -2
         ui = momentum(V, ui, mi, boxsize, dt)
         ne = continuity(ue, ne, dne, boxsize, dt)
+        #ne = dist_Bolt(Velectron, 1, Te)
         ni = continuity(ui, ni, dni, boxsize, dt)
-        Vdc += (ni[0]*ui[0] - ne[0]*ue[0])*dt/C
+        Vdc += (ni[0]*ui[0] - ne[0]*ue[0]) * dt / C
 
     plt.plot(V)
     plt.ylabel('V')
