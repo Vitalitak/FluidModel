@@ -122,6 +122,20 @@ def continuity(u, nprev, dn, boxsize, dt):
 
     return n
 
+def dist_Bolt(V, boxsize):
+
+    """
+    Boltzmann distribution for electrons
+    """
+
+    Nx = len(V)
+    dx = boxsize / Nx
+    n = [0 for k in range(0, Nx)]
+
+
+
+    return n
+
 def main():
 
     """
@@ -172,7 +186,7 @@ def main():
     plt.plot(ui,'r', ue, 'b')
     plt.axis([-50, Nx+50,-2, 2])
     plt.ylabel('velocity')
-    plt.text(500, 3.5, r'red - ions, blue - electrons')
+    plt.text(500, 1.5, r'red - ions, blue - electrons')
     plt.show()
 
     plt.plot(ni, 'r', ne, 'b')
