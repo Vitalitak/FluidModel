@@ -12,6 +12,9 @@ def Pois(ne, ni, Ve, boxsize):
     """
     sweep method solution of Poisson equation
     electrode boundary condition Ve
+
+    n = 1 = 10^10 cm-3 = 10^-2 mkm-3
+    V = n * (10^-2 mkm-3) * (dx mkm)^2 * (1.6E-19 C) / (8.85E-18 F/mkm) = n * dx^2 * 1.8E-4 V
     """
     Nx = len(ne)
     dx = boxsize / Nx
@@ -68,7 +71,7 @@ def momentum(V, uprev, m, boxsize, dt):
 
     for i in range(1, Nx - 1):
         a[i] = uprev[i+1] / 4.0 / dx / (-1 / dt + uprev[i - 1] * a[i-1] / 4.0 / dx)
-        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i])/dx/m - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
+        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i]) * 1.76E-1 /dx/m - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
 
     # boundary condition on plasma surface: (du/dx)p = 0
     a[Nx - 1] = 0
@@ -151,7 +154,7 @@ def main():
     boxsize = 1000
     dt = 0.01
     Nx = 1000
-    tEnd = 30
+    tEnd = 50
     dne = 0.01
     dni = 0.001
     me = 1
