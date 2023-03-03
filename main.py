@@ -173,6 +173,7 @@ def main():
     ui = [-0.01 for k in range(0, Nx)]
     Vrf = 0
     Vdc = -10
+    #ne = dist_Bolt(V, 1, Te)
 
     for i in range(0, Nt):
         t = i*dt
