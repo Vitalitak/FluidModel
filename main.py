@@ -151,10 +151,10 @@ def main():
     """
 
     # initialisation of parameters
-    boxsize = 1000
-    dt = 0.01
+    boxsize = 1000 # mkm
+    dt = 0.01 # ns
     Nx = 1000
-    tEnd = 50
+    tEnd = 50 # ns
     dne = 0.01
     dni = 0.001
     me = 1
