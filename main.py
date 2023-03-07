@@ -38,8 +38,8 @@ def Pois(ne, ni, Ve, boxsize):
     # boundary condition on plasma surface: (dV/dx)p = 0
     a[Nx-1] = 0
     #b[Nx-1] = (b[Nx-2] - (ne[Nx-1] - ni[Nx-1]) * dx * dx)/(2-a[Nx-2])
-    #b[Nx-1] = 0  #  (V)p = 0
-    b[Nx - 1] = b[Nx - 2] / (1 - a[Nx - 2])  # (dV/dx)p = 0
+    b[Nx-1] = 0  #  (V)p = 0
+    #b[Nx - 1] = b[Nx - 2] / (1 - a[Nx - 2])  # (dV/dx)p = 0
 
     # backward
     V[Nx-1] = b[Nx-1]
@@ -137,6 +137,16 @@ def dist_Bolt(V, np, Te):
     for i in range(0, Nx):
         n[i] = np * m.exp(V[i] / Te)
 
+    """
+    plt.plot(V)
+    plt.ylabel('V')
+    plt.show()
+
+    plt.plot(n)
+    plt.ylabel('n')
+    plt.show()
+    """
+
     return n
 
 def main():
@@ -154,7 +164,7 @@ def main():
     boxsize = 1000 # mkm
     dt = 0.01 # ns
     Nx = 1000
-    tEnd = 50 # ns
+    tEnd = 0.1 # ns
     dne = 0.01
     dni = 0.001
     me = 1
@@ -173,17 +183,22 @@ def main():
     ui = [-0.01 for k in range(0, Nx)]
     Vrf = 0
     Vdc = -10
-    #ne = dist_Bolt(V, 1, Te)
+    ne = dist_Bolt(V, 1, Te)
+    for k in range(0, 200):
+        ni[k] = k/200
+
 
     for i in range(0, Nt):
         t = i*dt
         Ve = Vdc + Vrf * np.sin(0.01356*t)
+        Velectron = [i * -1 for i in V]
+        ne = dist_Bolt(V, 1, Te)
         V = Pois(ne, ni, Ve, boxsize)
-        Velectron = [i*-1 for i in V]
-        ue = momentum(Velectron, ue, me, boxsize, dt)
+        #Velectron = [i*-1 for i in V]
+        #ue = momentum(Velectron, ue, me, boxsize, dt)
         #ue[0] = -2
         ui = momentum(V, ui, mi, boxsize, dt)
-        ne = continuity(ue, ne, dne, boxsize, dt)
+        #ne = continuity(ue, ne, dne, boxsize, dt)
         #ne = dist_Bolt(Velectron, 1, Te)
         ni = continuity(ui, ni, dni, boxsize, dt)
         Vdc += (ni[0]*ui[0] - ne[0]*ue[0]) * dt / C
@@ -193,13 +208,13 @@ def main():
     plt.show()
 
     plt.plot(ui,'r', ue, 'b')
-    plt.axis([-50, Nx+50,-2, 2])
+    plt.axis([-50, Nx+50,-0.5, 0.5])
     plt.ylabel('velocity')
     plt.text(500, 1.5, r'red - ions, blue - electrons')
     plt.show()
 
     plt.plot(ni, 'r', ne, 'b')
-    plt.axis([-50, Nx+50,-2, 2])
+    plt.axis([-50, Nx+50,-10, 10])
     plt.ylabel('concentration')
     plt.text(500, 0.5, r'red - ions, blue - electrons')
     plt.show()
