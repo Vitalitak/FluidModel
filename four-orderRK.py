@@ -6,6 +6,11 @@ import numpy as np
 four order Runge-Kutta method for solution equation
 dy/dx=f(x, y)
 
+Poisson equation with Maxwell-Boltzmann electrons and ion concentration from fluid model
+for dn/dt<<d(nu)/dx and du/dt<<u(du/dx)
+
+dV/dx = (2*(1-2V)^1/2+exp(V)-15/4)^1/2
+
 """
 def RKPois(h, y0, Nx):
 
