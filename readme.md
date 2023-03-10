@@ -10,3 +10,10 @@ First block:
 Second block:
 \
 Monte-Carlo simulation of ion transport across the sheath 
+
+
+TODO:
+    \
+    - boundary conditions or Vdc calculation
+    \
+    - initial conditions or solution convergence

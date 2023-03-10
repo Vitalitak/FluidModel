@@ -140,15 +140,6 @@ def dist_Bolt(V, np, Te):
     for i in range(0, Nx):
         n[i] = np * m.exp(V[i] / Te)
 
-    """
-    plt.plot(V)
-    plt.ylabel('V')
-    plt.show()
-
-    plt.plot(n)
-    plt.ylabel('n')
-    plt.show()
-    """
 
     return n
 
