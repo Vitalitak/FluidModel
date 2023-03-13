@@ -158,9 +158,9 @@ def main():
     boxsize = 1000 # mkm
     dte = 0.0001 # ns
     Nxe = 1000
-    dti = 2
+    dti = 0.1
     Nxi = 1000
-    tEnd = 0.02 # ns
+    tEnd = 0.05 # ns
     dne = 0.01
     dni = 0.001
     me = 1
