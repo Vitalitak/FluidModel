@@ -48,7 +48,7 @@ def Pois(ne, ni, Ve, boxsize):
 
     return V
 
-def momentum(V, uprev, m, boxsize, dt):
+def momentum(V, n, uprev, m, kTm, boxsize, dt):
 
     """
     sweep method solution of momentum balance equation
@@ -71,7 +71,7 @@ def momentum(V, uprev, m, boxsize, dt):
 
     for i in range(1, Nx - 1):
         a[i] = uprev[i+1] / 4.0 / dx / (-1 / dt + uprev[i - 1] * a[i-1] / 4.0 / dx)
-        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i]) * 1.75E5 /dx/m - uprev[i] / dt) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
+        b[i] = (-uprev[i-1] / 4.0 / dx * b[i - 1] + (V[i+1]-V[i]) * 1.75E5 /dx/m - uprev[i] / dt - kTm*(n[i+1]-n[i])/n[i]) / (-1 / dt + uprev[i-1] * a[i-1] / 4.0 / dx)
 
     # boundary condition on plasma surface: (du/dx)p = 0
     a[Nx - 1] = 0
@@ -160,12 +160,12 @@ def main():
     Nxe = 1000
     dti = 2
     Nxi = 1000
-    tEnd = 0.13 # ns
+    tEnd = 0.02 # ns
     dne = 0.01
     dni = 0.001
     me = 1
     mi = 72000
-    C = 1.4E-16
+    C = 1.4E-22 # C = [n] * C0/Selrctr  [n]=1e-2 mkm-3, C0 = 1000 pF, Selectr = 7,1e10 mkm2
     C /= 1.6E-19
     Te = 2.3
 
@@ -180,12 +180,18 @@ def main():
     Vrf = 0
     Vdc = -10
     #ne = dist_Bolt(V, 1, Te)
+
     for k in range(0, 300):
         ni[k] = k/300
         ne[k] = k/500
+        ui[k] = -1 + k/500 # Bohm velocity
+        ue[k] = 1 - k/500
 
     for k in range(300, 500):
         ne[k] = k/500
+        ui[k] = -1 + k / 500 # # Bohm velocity
+        ue[k] = 1 - k / 500
+
 
     flag = int(dti/dte) - 1
 
@@ -198,14 +204,14 @@ def main():
         V = Pois(ne, ni, Ve, boxsize)
         Velectron = [i*-1 for i in V]
 
-        ue = momentum(Velectron, ue, me, boxsize, dte)
+        ue = momentum(Velectron, ne, ue, me, 1000, boxsize, dte)
         #ue[0] = -2
         #ui = momentum(V, ui, mi, boxsize, dt)
 
         ne = continuity(ue, ne, dne, boxsize, dte)
 
         if flag == int(dti/dte):
-            ui = momentum(V, ui, mi, boxsize, dti)
+            ui = momentum(V, ni, ui, mi, 2, boxsize, dti)
             #ne = dist_Bolt(Velectron, 1, Te)
             ni = continuity(ui, ni, dni, boxsize, dti)
             flag = 0
@@ -216,13 +222,13 @@ def main():
     plt.show()
 
     plt.plot(ui,'r', ue, 'b')
-    plt.axis([-50, Nxe+50,-1000, 1000])
+    plt.axis([-50, Nxe+50,-5000, 5000])
     plt.ylabel('velocity')
     plt.text(500, 1.5, r'red - ions, blue - electrons')
     plt.show()
 
     plt.plot(ni, 'r', ne, 'b')
-    plt.axis([-50, Nxe+50,-2, 10])
+    plt.axis([-50, Nxe+50,-2, 20])
     plt.ylabel('concentration')
     plt.text(500, 0.5, r'red - ions, blue - electrons')
     plt.show()
