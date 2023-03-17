@@ -14,6 +14,8 @@ Monte-Carlo simulation of ion transport across the sheath
 
 TODO:
     \
+    - pressure gradient term in momentum equation
+    \
     - boundary conditions or Vdc calculation
     \
     - initial conditions or solution convergence
