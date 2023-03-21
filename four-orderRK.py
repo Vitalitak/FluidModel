@@ -59,7 +59,8 @@ def main():
     Nipl = [0 for k in range(0, Nx)]
     Nepl = [0 for k in range(0, Nx)]
     uipl = [0 for k in range(0, Nx)]
-    dKsidx = [0 for k in range(0, Nx)]
+    dKsidxpl = [0 for k in range(0, Nx)]
+
     #V0 = [0 for k in range(0, Nx)]
 
     Npl = int(a/dx)
@@ -70,23 +71,36 @@ def main():
         Nipl[i] = n0 - n0*e*V0/kTe*(m.cosh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])-1)
         uipl[i] = n0 * m.sqrt(kTi/mi) / Nipl[i]
         Nepl[i] = n0 * m.exp(e*Vpl[i]/kTe)
-        dKsidx[i] = 2*Ti/Te*e*V0/kTe*m.sqrt(e*e*n0/2/eps0/kTi)*m.sinh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])
+        dKsidxpl[i] = 2*Ti/Te*e*V0/kTe*m.sqrt(e*e*n0/2/eps0/kTi)*m.sinh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])
 
 
     print(m.sqrt(eps0*kTe/e*e*n0))
     print(V0)
 
 
-    V = [0 for k in range(0, Nx)]
-    ne = [1 for k in range(0, Nx)]
-    ni = [1 for k in range(0, Nx)]
-    ue = [0 for k in range(0, Nx)]
-    ui = [-0.01 for k in range(0, Nx)]
+    Ksi = [0 for k in range(0, Nx)]
+    #Ne = [0 for k in range(0, Nx)]
+    Ni = [0 for k in range(0, Nx)]
+    #Ve = [0 for k in range(0, Nx)]
+    #Vi = [0 for k in range(0, Nx)]
     Vrf = 0
 
-    # ne = dist_Bolt(V, 1, Te)
+    for i in range(0, Npl):
+        Ksi[i] = e*(Vpl[i]-V0)/kTe
+        Ni[i] = Nipl[i]/n0
+
 
     V = RKPois(dx, Vdc, Nx)
+
+    """
+    plt.plot(x, Ksi)
+    plt.ylabel('Ksi')
+    plt.show()
+
+    plt.plot(x, Ni)
+    plt.ylabel('N')
+    plt.show()
+    """
 
     plt.plot(x, Nepl, 'b')
     plt.plot(x, Nipl, 'r')
@@ -97,13 +111,14 @@ def main():
     plt.ylabel('V')
     plt.show()
 
-    plt.plot(x, dKsidx)
+    plt.plot(x, dKsidxpl)
     plt.ylabel('E')
     plt.show()
 
     plt.plot(x, uipl)
     plt.ylabel('u')
     plt.show()
+
 
     return 0
 
