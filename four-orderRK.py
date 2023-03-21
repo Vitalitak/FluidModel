@@ -25,7 +25,7 @@ def RKPois(h, y0, Nx):
 def main():
 
     # initialisation of parameters
-    boxsize = 3E-4  # m
+    boxsize = 1.36E-4  # m
     dt = 0.1  # ns
     Nx = 1000000
     tEnd = 50  # ns
@@ -44,8 +44,8 @@ def main():
     eps0 = 8.85E-12
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
-    #V0 = -0.01
-    V0 = -1/2*m.sqrt(Te/2/Ti)*kTe/e/m.sinh(m.sqrt(e*e*n0/2/eps0/kTi)*boxsize-m.sqrt(Te/2/Ti))
+    V0 = -0.01
+    #V0 = -1/2*m.sqrt(Te/2/Ti)*kTe/e/m.sinh(m.sqrt(e*e*n0/2/eps0/kTi)*boxsize-m.sqrt(Te/2/Ti))
 
     # Te *= 1.7E12 / 9.1  # kT/me
 
@@ -58,11 +58,14 @@ def main():
     Nipl = [0 for k in range(0, Nx)]
     Nepl = [0 for k in range(0, Nx)]
     uipl = [0 for k in range(0, Nx)]
+    dKsidx = [0 for k in range(0, Nx)]
     for i in range(0, Nx):
         Vpl[i] = V0*(1+2*Ti/Te*(m.cosh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])-1))
         Nipl[i] = n0 - n0*e*V0/kTe*(m.cosh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])-1)
         uipl[i] = n0 * m.sqrt(kTi/mi) / Nipl[i]
         Nepl[i] = n0 * m.exp(e*Vpl[i]/kTe)
+        dKsidx[i] = 2*Ti/Te*e*V0/kTe*m.sqrt(e*e*n0/2/eps0/kTi)*m.sinh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])
+
 
     print(m.sqrt(eps0*kTe/e*e*n0))
     print(V0)
@@ -85,6 +88,10 @@ def main():
 
     plt.plot(x, Vpl)
     plt.ylabel('V')
+    plt.show()
+
+    plt.plot(x, dKsidx)
+    plt.ylabel('E')
     plt.show()
 
     return 0
