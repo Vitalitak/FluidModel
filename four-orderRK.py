@@ -59,6 +59,7 @@ def main():
     Nipl = [0 for k in range(0, Nx)]
     Nepl = [0 for k in range(0, Nx)]
     uipl = [0 for k in range(0, Nx)]
+    Epl = [0 for k in range(0, Nx)]
     dKsidxpl = [0 for k in range(0, Nx)]
 
     #V0 = [0 for k in range(0, Nx)]
@@ -72,6 +73,7 @@ def main():
         uipl[i] = n0 * m.sqrt(kTi/mi) / Nipl[i]
         Nepl[i] = n0 * m.exp(e*Vpl[i]/kTe)
         dKsidxpl[i] = 2*Ti/Te*e*V0/kTe*m.sqrt(e*e*n0/2/eps0/kTi)*m.sinh(m.sqrt(e*e*n0/2/eps0/kTi)*x[i])
+        Epl[i] = -kTe/e*dKsidxpl[i]
 
 
     print(m.sqrt(eps0*kTe/e*e*n0))
@@ -111,7 +113,7 @@ def main():
     plt.ylabel('V')
     plt.show()
 
-    plt.plot(x, dKsidxpl)
+    plt.plot(x, Epl)
     plt.ylabel('E')
     plt.show()
 
