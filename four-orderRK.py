@@ -7,9 +7,9 @@ four order Runge-Kutta method for solution equation
 dy/dx=f(x, y)
 
 Poisson equation with Maxwell-Boltzmann electrons and ion concentration from fluid model
-for dn/dt<<d(nu)/dx and du/dt<<u(du/dx)
+for dn/dt = 0 and du/dt = 0
 
-dV/dx = (2*(1-2V)^1/2+exp(V)-15/4)^1/2
+dKsi/dx=F(x, Ksi)
 
 """
 def RKPois(h, y0, Nx):
