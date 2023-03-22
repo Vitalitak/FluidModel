@@ -29,7 +29,7 @@ def RKPois(dx, Nx, Ksi, Npl, n0, Ti, Te, V0):
     
     Four order Runge-Kutta method
     f1=F(x[n], Ksi[n])
-    f2=F(x[n]+dx/2, Ksi[n]+dx/2*f1) = F(x[n]+dx/2, Ksi[n]+dx/2*F(x[n], Ksi[n]))
+    f2=F(x[n]+dx/2, Ksi[n]+dx/2*f1)
     f3=F(x[n]+dx/2, Ksi[n]+dx/2*f2)
     f4=F(x[n]+dx, Ksi[n]+dx*f3)
     
@@ -45,19 +45,13 @@ def RKPois(dx, Nx, Ksi, Npl, n0, Ti, Te, V0):
     A = 2 * e*e * n0 / eps0 / kTe * m.exp(e * V0 / kTe)
     B = 2 * e*e * n0 / eps0 / kTe * Ti / Te
 
-    #print(C)
-    #print(A)
 
     for i in range(Npl-1, Nx-1):
         f1=-m.pow((C+A*m.exp(Ksi[i])+B*m.pow((4/3-2*Te/(3*Ti)*Ksi[i]), 1.5)), 0.5)
-        #print(f1)
         f2=-m.pow((C+A*m.exp(Ksi[i]+dx/2*f1)+B*m.pow((4/3-2*Te/(3*Ti)*(Ksi[i]+dx/2*f1)), 1.5)), 0.5)
-        #print(f2)
         f3 = -m.pow((C + A * m.exp(Ksi[i] + dx / 2 * f2) + B * m.pow(
             (4 / 3 - 2 * Te / (3 * Ti) * (Ksi[i] + dx / 2 * f2)), 1.5)), 0.5)
-        print(f3)
         f4=-m.pow((C+A*m.exp(Ksi[i]+dx*f3)+B*m.pow((4/3-2*Te/(3*Ti)*(Ksi[i]+dx*f3)), 1.5)), 0.5)
-        print(f4)
         Ksi[i+1] = Ksi[i]+dx/6*(f1+2*f2+2*f3+f4)
 
 
@@ -67,35 +61,41 @@ def RKPois(dx, Nx, Ksi, Npl, n0, Ti, Te, V0):
 def main():
 
     # initialisation of parameters
-    boxsize = 4E-4  # m
+    boxsize = 3.5E-4  # m
     dt = 0.1  # ns
     Nx = 100000
     tEnd = 50  # ns
-    dne = 0.01
-    dni = 0.001
+
     me = 9.11E-31  # kg
     mi = 6.68E-26  # kg
-    C = 1.4E-16
-    C /= 1.6E-19
+    e = 1.6E-19
+    eps0 = 8.85E-12
+
+    #plasma parameters
     Te = 2.3  # eV
     Ti = 0.06  # eV
-    Vdc = -18
-    e = 1.6E-19
     n0 = 1E16  # m-3
+    Vdc = -18
+    C = 1.4E-16
+    C /= 1.6E-19
+
+    # stitching parameters
     a = 1.3E-4  # m
     P = 1.4  #  P = ni(a)/n0
-    eps0 = 8.85E-12
+
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
-    #V0 = -0.01
     V0 = kTe / e * (1 - P) / (m.cosh(m.sqrt(e * e * n0 / 2 / eps0 / kTi) * a) - 1)
 
-    # Te *= 1.7E12 / 9.1  # kT/me
 
     Nt = int(tEnd / dt)
     dx = boxsize / Nx
 
     x = [k*dx for k in range(0, Nx)]
+    V = [0 for k in range(0, Nx)]
+    ni = [0 for k in range(0, Nx)]
+    ne = [0 for k in range(0, Nx)]
+    ui = [0 for k in range(0, Nx)]
 
     Vpl = [0 for k in range(0, Nx)]
     Nipl = [0 for k in range(0, Nx)]
@@ -133,11 +133,24 @@ def main():
         Ksi[i] = e*(Vpl[i]-V0)/kTe
         Ni[i] = Nipl[i]/n0
 
+    """
     plt.plot(x, dKsidxpl)
     plt.ylabel('dKsi/dx')
     plt.show()
+    """
 
     Ksi = RKPois(dx, Nx, Ksi, Npl, n0, Ti, Te, V0)
+
+    for i in range(Npl, Nx):
+        Ni[i]=m.sqrt(4/3-2*Te/3/Ti*Ksi[i])
+
+    # return to V, n
+    for i in range(0, Nx):
+        V[i] = kTe/e*Ksi[i]+V0
+        ni[i] = n0 * Ni[i]
+        ui[i] = n0*m.sqrt(kTi/mi)/ni[i]
+        ne[i] = n0*m.exp(e*V[i]/kTe)
+
 
     """
     plt.plot(x, Ksi)
@@ -149,20 +162,20 @@ def main():
     plt.show()
     """
 
-    plt.plot(x, Nepl, 'b')
-    plt.plot(x, Nipl, 'r')
+    plt.plot(x, ne, 'b')
+    plt.plot(x, ni, 'r')
     plt.ylabel('N')
     plt.show()
 
-    plt.plot(x, Ksi)
-    plt.ylabel('Ksi')
+    plt.plot(x, V)
+    plt.ylabel('V')
     plt.show()
 
     plt.plot(x, Epl)
     plt.ylabel('E')
     plt.show()
 
-    plt.plot(x, uipl)
+    plt.plot(x, ui)
     plt.ylabel('u')
     plt.show()
 
