@@ -12,22 +12,64 @@ for dn/dt = 0 and du/dt = 0
 dKsi/dx=F(x, Ksi)
 
 """
-def RKPois(h, y0, Nx):
+def RKPois(dx, Nx, Ksi, Npl, n0, Ti, Te, V0):
 
-    y = [0 for k in range(0, Nx)]
+    e = 1.6E-19
+    eps0 = 8.85E-12
+    kTe = Te * 1.6E-19  # J
 
-    y[0] = y0
+    """
+    dKsi/dx=F(x, Ksi)
+    F = -(C+A*exp(Ksi)+B*(4/3-2Te/(3Ti)*Ksi)^3/2)^1/2
+    
+    C=((Ksi[Npl-1]-Ksi[Npl-2])/dx)^2-2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)*m.exp(Ksi[Npl-1])-2*e*e*n0/eps0/kTe*Ti/Te*(4/3-2*Te/3/Ti*Ksi[Npl-1])^1.5
+    A=2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)
+    B=2*e*e*n0/eps0/kTe*Ti/Te
+    Ksi(a)=Ksi[Npl-1]
+    
+    Four order Runge-Kutta method
+    f1=F(x[n], Ksi[n])
+    f2=F(x[n]+dx/2, Ksi[n]+dx/2*f1) = F(x[n]+dx/2, Ksi[n]+dx/2*F(x[n], Ksi[n]))
+    f3=F(x[n]+dx/2, Ksi[n]+dx/2*f2)
+    f4=F(x[n]+dx, Ksi[n]+dx*f3)
+    
+    Ksi[n+1]=Ksi[n]+dx/6*(f1+2*f2+2*f3+f4)
+    
+    """
+
+    #dx = x[Npl - 1]-x[Npl - 2]
+    #Nx = len[Ksi]
+
+    C = m.pow((Ksi[Npl - 1] - Ksi[Npl - 2]) / dx, 2) - 2 * e*e * n0 / eps0 / kTe * m.exp(e * V0 / kTe) * m.exp(
+        Ksi[Npl - 1]) - 2 * e*e * n0 / eps0 / kTe * Ti / Te * m.pow((4 / 3 - 2 * Te / 3 / Ti * Ksi[Npl - 1]), 1.5)
+    A = 2 * e*e * n0 / eps0 / kTe * m.exp(e * V0 / kTe)
+    B = 2 * e*e * n0 / eps0 / kTe * Ti / Te
+
+    #print(C)
+    #print(A)
+
+    for i in range(Npl-1, Nx-1):
+        f1=-m.pow((C+A*m.exp(Ksi[i])+B*m.pow((4/3-2*Te/(3*Ti)*Ksi[i]), 1.5)), 0.5)
+        #print(f1)
+        f2=-m.pow((C+A*m.exp(Ksi[i]+dx/2*f1)+B*m.pow((4/3-2*Te/(3*Ti)*(Ksi[i]+dx/2*f1)), 1.5)), 0.5)
+        #print(f2)
+        f3 = -m.pow((C + A * m.exp(Ksi[i] + dx / 2 * f2) + B * m.pow(
+            (4 / 3 - 2 * Te / (3 * Ti) * (Ksi[i] + dx / 2 * f2)), 1.5)), 0.5)
+        print(f3)
+        f4=-m.pow((C+A*m.exp(Ksi[i]+dx*f3)+B*m.pow((4/3-2*Te/(3*Ti)*(Ksi[i]+dx*f3)), 1.5)), 0.5)
+        print(f4)
+        Ksi[i+1] = Ksi[i]+dx/6*(f1+2*f2+2*f3+f4)
 
 
 
-    return y
+    return Ksi
 
 def main():
 
     # initialisation of parameters
-    boxsize = 2E-4  # m
+    boxsize = 4E-4  # m
     dt = 0.1  # ns
-    Nx = 1000000
+    Nx = 100000
     tEnd = 50  # ns
     dne = 0.01
     dni = 0.001
@@ -91,8 +133,11 @@ def main():
         Ksi[i] = e*(Vpl[i]-V0)/kTe
         Ni[i] = Nipl[i]/n0
 
+    plt.plot(x, dKsidxpl)
+    plt.ylabel('dKsi/dx')
+    plt.show()
 
-    V = RKPois(dx, Vdc, Nx)
+    Ksi = RKPois(dx, Nx, Ksi, Npl, n0, Ti, Te, V0)
 
     """
     plt.plot(x, Ksi)
@@ -109,8 +154,8 @@ def main():
     plt.ylabel('N')
     plt.show()
 
-    plt.plot(x, Vpl)
-    plt.ylabel('V')
+    plt.plot(x, Ksi)
+    plt.ylabel('Ksi')
     plt.show()
 
     plt.plot(x, Epl)
