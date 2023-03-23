@@ -69,6 +69,62 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
 
     return Ksi
 
+
+def RKPoisN(dx, Ksi, Npl, n0, Ti, Te, V0):
+    e = 1.6E-19
+    eps0 = 8.85E-12
+    kTe = Te * 1.6E-19  # J
+
+    """
+    Ksi(a)=Ksi1(a)=Ksi[Npl-1]
+    dKsi/dx(a) = dKsi1/dx(a) = (Ksi[Npl-1]-Ksi[Npl-2])/dx
+    dKsi/dx<0
+
+    dKsi/dx=-F(x, Ksi)
+    F = -(A*exp(Ksi)+B*(1-Te/(2*Ti)*Ksi)^3/2+C)^1/2
+
+    A=2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)
+    B=4*Ti/Te*e*e*n0/eps0/kTe
+    C=m.pow((Ksi[Npl-1]-Ksi[Npl-2])/dx, 2)-2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)*m.exp(Ksi[Npl-1])-4*Ti/Te*e*e*n0/eps0/kTe*m.pow((1-Te/2/Ti*Ksi[Npl-1]), 1.5)
+    Ksi(a)=Ksi[Npl-1]
+
+    Four order Runge-Kutta method
+    f1=-F(x[n], Ksi[n])
+    f2=-F(x[n]+dx/2, Ksi[n]+dx/2*f1)
+    f3=-F(x[n]+dx/2, Ksi[n]+dx/2*f2)
+    f4=-F(x[n]+dx, Ksi[n]+dx*f3)
+
+    Ksi[n+1]=Ksi[n]+dx/6*(f1+2*f2+2*f3+f4)
+    """
+    
+
+    # dx = x[Npl - 1]-x[Npl - 2]
+    Nx = len[Ksi]
+
+    #Ksi[2] = dx * dx * e * e * n0 / eps0 / kTe * (m.exp(e * V0 / kTe) - 1)
+
+    A = 2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)
+    B = 4*Ti/Te*e*e*n0/eps0/kTe
+    C = m.pow((Ksi[Npl-1]-Ksi[Npl-2])/dx, 2)-2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)*m.exp(Ksi[Npl-1])-4*Ti/Te*e*e*n0/eps0/kTe*m.pow((1-Te/2/Ti*Ksi[Npl-1]), 1.5)
+
+    # print(A)
+    # print(B)
+    # print(C)
+    # print(D)
+
+    for i in range(Npl-1, Nx-1):
+        f1 = -m.pow((A * m.exp(Ksi[i]) + B * m.pow((1 - Te / 2 / Ti * Ksi[i]), 1.5) + C), 0.5)
+        f2 = -m.pow((A * m.exp(Ksi[i] + dx / 2 * f1) + B * m.pow(
+            (1 - Te / 2 / Ti * (Ksi[i] + dx / 2 * f1)), 1.5) + C), 0.5)
+        f3 = -m.pow((A * m.exp(Ksi[i] + dx / 2 * f2) + B * m.pow(
+            (1 - Te / 2 / Ti * (Ksi[i] + dx / 2 * f2)), 1.5) + C), 0.5)
+        f4 = -m.pow((A * m.exp(Ksi[i] + dx * f3) + B * m.pow(
+            (1 - Te / 2 / Ti * (Ksi[i] + dx * f3)), 1.5) + C), 0.5)
+        Ksi[i + 1] = Ksi[i] + dx / 6 * (f1 + 2 * f2 + 2 * f3 + f4)
+
+    return Ksi
+
+
 def main():
 
     # initialisation of parameters
@@ -156,6 +212,11 @@ def main():
 
     for i in range(0, Nx):
         Ni[i]=1-1/3*(1-m.sqrt(1-3*Te/Ti*Ksi[i]))
+
+
+    Ksi = RKPoisN(dx, Ksi, Npl, n0, Ti, Te, V0)
+
+
     """
     # return to V, n
     for i in range(0, Nx):
