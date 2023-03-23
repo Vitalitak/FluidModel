@@ -220,16 +220,16 @@ def main():
         Ni[i] = 1/2*m.pow((1-Te/2/Ti*Ksi[i]), -0.5)
 
 
-    """
+
     # return to V, n
     for i in range(0, Nx):
         V[i] = kTe/e*Ksi[i]+V0
         ni[i] = n0 * Ni[i]
         ui[i] = n0*m.sqrt(kTi/mi)/ni[i]
         ne[i] = n0*m.exp(e*V[i]/kTe)
+
+
     """
-
-
     plt.plot(x, Ksi)
     plt.ylabel('Ksi')
     plt.show()
@@ -248,14 +248,13 @@ def main():
     plt.ylabel('V')
     plt.show()
 
-    plt.plot(x, Epl)
-    plt.ylabel('E')
-    plt.show()
+    #plt.plot(x, Epl)
+    #plt.ylabel('E')
+    #plt.show()
 
     plt.plot(x, ui)
     plt.ylabel('u')
     plt.show()
-    """
 
     return 0
 
