@@ -70,7 +70,7 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     return Ksi
 
 
-def RKPoisN(dx, Ksi, Npl, n0, Ti, Te, V0):
+def RKPoisN(dx, Ksi, Npl, Nx, n0, Ti, Te, V0):
     e = 1.6E-19
     eps0 = 8.85E-12
     kTe = Te * 1.6E-19  # J
@@ -99,7 +99,7 @@ def RKPoisN(dx, Ksi, Npl, n0, Ti, Te, V0):
     
 
     # dx = x[Npl - 1]-x[Npl - 2]
-    Nx = len[Ksi]
+    #Nx = len[Ksi]
 
     #Ksi[2] = dx * dx * e * e * n0 / eps0 / kTe * (m.exp(e * V0 / kTe) - 1)
 
@@ -128,9 +128,9 @@ def RKPoisN(dx, Ksi, Npl, n0, Ti, Te, V0):
 def main():
 
     # initialisation of parameters
-    boxsize = 1E-4  # m
+    boxsize = 2E-4  # m
     dt = 0.1  # ns
-    Nx = 4000000
+    Nx = 8000000
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -214,7 +214,10 @@ def main():
         Ni[i]=1-1/3*(1-m.sqrt(1-3*Te/Ti*Ksi[i]))
 
 
-    Ksi = RKPoisN(dx, Ksi, Npl, n0, Ti, Te, V0)
+    Ksi = RKPoisN(dx, Ksi, Npl, Nx, n0, Ti, Te, V0)
+
+    for i in range(Npl, Nx):
+        Ni[i] = 1/2*m.pow((1-Te/2/Ti*Ksi[i]), -0.5)
 
 
     """
