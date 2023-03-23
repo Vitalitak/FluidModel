@@ -25,7 +25,7 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     dKsi/dx>0
     
     dKsi/dx=F(x, Ksi)
-    F = (A*exp(Ksi)+B*Ksi+c*(1-3Te/Ti*Ksi)^3/2+D)^1/2
+    F = (A*exp(Ksi)+B*Ksi+C*(1-3Te/Ti*Ksi)^3/2+D)^1/2
 
     A=2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)
     B=-8*e*e*n0/eps0/kTe
@@ -46,17 +46,18 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     # dx = x[Npl - 1]-x[Npl - 2]
     # Nx = len[Ksi]
 
+    Ksi[2] = dx*dx*e*e*n0/eps0/kTe*(m.exp(e*V0/kTe)-1)
     A = 2 * e * e * n0 / eps0 / kTe * m.exp(e * V0 / kTe)
-    B = -8 * e * e * n0 / eps0 / kTe * Ti / Te
-    C = -4/27*Ti/Te*e*e*n0/eps0/kTe
-    D = -2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)+4/27*Ti/Te*e*e*n0/eps0/kTe
+    B = -4 / 3 * e * e * n0 / eps0 / kTe * Ti / Te
+    C = 4/27*Ti/Te*e*e*n0/eps0/kTe
+    D = -2*e*e*n0/eps0/kTe*m.exp(e*V0/kTe)-4/27*Ti/Te*e*e*n0/eps0/kTe
 
-    print(A)
-    print(B)
-    print(C)
-    print(D)
+    #print(A)
+    #print(B)
+    #print(C)
+    #print(D)
 
-    for i in range(0, Npl):
+    for i in range(2, Npl):
         f1 = m.pow((A * m.exp(Ksi[i])+B*Ksi[i] + C * m.pow((1 - 3 * Te / Ti * Ksi[i]), 1.5)+D), 0.5)
         f2 = m.pow((A * m.exp(Ksi[i] + dx / 2 * f1) + B*(Ksi[i]+ dx / 2 * f1) + C * m.pow(
             (1 - 3 * Te / Ti * (Ksi[i] + dx / 2 * f1)), 1.5)+D), 0.5)
@@ -71,9 +72,9 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
 def main():
 
     # initialisation of parameters
-    boxsize = 2E-4  # m
+    boxsize = 1E-4  # m
     dt = 0.1  # ns
-    Nx = 100000
+    Nx = 4000000
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -90,12 +91,12 @@ def main():
     C /= 1.6E-19
 
     # stitching parameters
-    a = 1E-4  # m
-    P = 1.4  #  P = ni(a)/n0
+    a = 1.75E-5  # m
+    P = 0.745  #  P = ni(a)/n0
 
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
-    V0 = -0.1
+    V0 = 0.01
     #V0 = kTe / e * (1 - P) / (m.cosh(m.sqrt(e * e * n0 / 2 / eps0 / kTi) * a) - 1)
 
 
@@ -152,10 +153,10 @@ def main():
     """
 
     Ksi = RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0)
-    """
-    for i in range(Npl, Nx):
-        Ni[i]=m.sqrt(4/3-2*Te/3/Ti*Ksi[i])
 
+    for i in range(0, Nx):
+        Ni[i]=1-1/3*(1-m.sqrt(1-3*Te/Ti*Ksi[i]))
+    """
     # return to V, n
     for i in range(0, Nx):
         V[i] = kTe/e*Ksi[i]+V0
@@ -168,11 +169,11 @@ def main():
     plt.plot(x, Ksi)
     plt.ylabel('Ksi')
     plt.show()
-    """
+
     plt.plot(x, Ni)
     plt.ylabel('N')
     plt.show()
-    
+    """
 
     plt.plot(x, ne, 'b')
     plt.plot(x, ni, 'r')
