@@ -132,7 +132,7 @@ def RKPoisN(dx, Ksi, Npl, Nx, n0, Ti, Te, V0):
 
 def main():
     # initialisation of parameters
-    boxsize = 7E-4  # m
+    boxsize = 6E-4  # m
     dt = 0.1  # ns
     Nx = 2000000
     tEnd = 50  # ns
@@ -151,12 +151,12 @@ def main():
     C /= 1.6E-19
 
     # stitching parameters
-    a = 3E-5  # m
+    a = 5E-5  # m
     P = 0.995  # P = ni(a)/n0 boundary N(x)
 
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
-    V0 = -0.01
+    V0 = -0.06
     # V0 = kTe / e * (1 - P) / (m.cosh(m.sqrt(e * e * n0 / 2 / eps0 / kTi) * a) - 1)
 
     Nt = int(tEnd / dt)
@@ -241,7 +241,7 @@ def main():
     plt.plot(x, ni, 'r')
     plt.ylabel('N')
     plt.show()
-    """
+
     plt.plot(x, V)
     plt.ylabel('V')
     plt.show()
@@ -253,7 +253,7 @@ def main():
     plt.plot(x, ui)
     plt.ylabel('u')
     plt.show()
-    """
+
     return 0
 
 
