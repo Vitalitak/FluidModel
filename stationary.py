@@ -9,6 +9,9 @@ dy/dx=f(x, y)
 Poisson equation with Maxwell-Boltzmann electrons and ion concentration from fluid model
 for dn/dt = 0 and du/dt = 0
 
+N=1
+gammai = 3
+
 dKsi/dx=F(x, Ksi)
 
 """
@@ -23,6 +26,8 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     Ksi(0)=0
     dKsi/dx(0) = 0
     dKsi/dx>0
+    
+    boundary N(x) = 0.745
     
     dKsi/dx=F(x, Ksi)
     F = (A*exp(Ksi)+B*Ksi+C*(1-3Te/Ti*Ksi)^3/2+D)^1/2
@@ -148,7 +153,7 @@ def main():
 
     # stitching parameters
     a = 1.75E-5  # m
-    P = 0.745  #  P = ni(a)/n0
+    P = 0.745  #  P = ni(a)/n0 boundary N(x)
 
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J

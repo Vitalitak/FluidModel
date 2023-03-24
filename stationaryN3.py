@@ -26,6 +26,8 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     Ksi(0)=0
     dKsi/dx(0) = 0
     dKsi/dx>0
+    
+    boundary N(x) = 0.995
 
     dKsi/dx=F(x, Ksi)
     F = -(A*exp(Ksi)+B*Ksi+C*(1-19*Te/2/Ti*Ksi)^3/2+D)^1/2
@@ -150,7 +152,7 @@ def main():
 
     # stitching parameters
     a = 3E-5  # m
-    P = 0.995  # P = ni(a)/n0
+    P = 0.995  # P = ni(a)/n0 boundary N(x)
 
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
