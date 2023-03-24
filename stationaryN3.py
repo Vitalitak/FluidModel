@@ -139,7 +139,7 @@ def main():
     # initialisation of parameters
     boxsize = 7E-4  # m
     dt = 0.1  # ns
-    Nx = 1000000
+    Nx = 2000000
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -156,8 +156,8 @@ def main():
     C /= 1.6E-19
 
     # stitching parameters
-    a = 1.1E-4  # m
-    P = 0.75  # P = ni(a)/n0
+    a = 3E-5  # m
+    P = 0.995  # P = ni(a)/n0
 
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
@@ -224,14 +224,14 @@ def main():
 
     #for i in range(Npl, Nx):
         #Ni[i] = 1 / 2 * m.pow((1 - Te / 2 / Ti * Ksi[i]), -0.5)
-    """
+
     # return to V, n
     for i in range(0, Nx):
         V[i] = kTe / e * Ksi[i] + V0
         ni[i] = n0 * Ni[i]
         ui[i] = n0 * m.sqrt(kTi / mi) / ni[i]
         ne[i] = n0 * m.exp(e * V[i] / kTe)
-    """
+
 
     plt.plot(x, Ksi)
     plt.ylabel('Ksi')
@@ -241,12 +241,12 @@ def main():
     plt.ylabel('N')
     plt.show()
 
-    """
+
     plt.plot(x, ne, 'b')
     plt.plot(x, ni, 'r')
     plt.ylabel('N')
     plt.show()
-
+    """
     plt.plot(x, V)
     plt.ylabel('V')
     plt.show()
