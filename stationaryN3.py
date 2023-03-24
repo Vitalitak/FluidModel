@@ -59,13 +59,6 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     # print(B)
     # print(C)
     # print(D)
-    print(A)
-    print(Ksi[2])
-    print((2 * e * e * n0 / eps0 / kTe)*Ksi[2])
-    print(A*m.exp(Ksi[2])-A)
-    print(B*Ksi[2])
-    print(C*m.pow((1 - 19 * Te / 2 / Ti * Ksi[2]), 1.5) - 8/361 * Ti / Te * e * e * n0 / eps0 / kTe)
-    print(D)
 
     for i in range(2, Npl):
         f1 = -m.pow((A * m.exp(Ksi[i]) + B * Ksi[i] + C * m.pow((1 - 19 * Te / 2 / Ti * Ksi[i]), 1.5) + D), 0.5)
