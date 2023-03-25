@@ -75,7 +75,7 @@ def RKPois1(dx, Ksi, Npl, n0, Ti, Te, V0):
     return Ksi
 
 
-def RKPoisN(dx, Ksi, Nsh, Nx, n0, Ti, Te, V0):
+def RKPoisN(dx, Ksi, Nsh, Nx, n0, Ti, Te, V0, b):
     e = 1.6E-19
     eps0 = 8.85E-12
     kTe = Te * 1.6E-19  # J
@@ -109,7 +109,7 @@ def RKPoisN(dx, Ksi, Nsh, Nx, n0, Ti, Te, V0):
 
     A = 2 * e * e * n0 / eps0 / kTe * m.exp(e * V0 / kTe)
     B = 32*m.sqrt(2/3)*Ti/Te*e*e*n0/eps0/kTe
-    C = m.pow(1/2/m.sqrt(eps0*kTe/e*e*n0), 2) - 2 * e * e * n0 / eps0 / kTe *m.exp(e*V0/kTe) *m.exp(-(1-Ti/Te)) - 32*m.sqrt(2/3) * Ti / Te * e * e * n0 / eps0 / kTe *m.pow((1+Te/4/Ti*(1-Ti/Te)), 0.5)
+    C = m.pow(1/b/m.sqrt(eps0*kTe/e*e*n0), 2) - 2 * e * e * n0 / eps0 / kTe *m.exp(e*V0/kTe) *m.exp(-(1-Ti/Te)) - 32*m.sqrt(2/3) * Ti / Te * e * e * n0 / eps0 / kTe *m.pow((1+Te/4/Ti*(1-Ti/Te)), 0.5)
 
     # print(A)
     # print(B)
@@ -152,6 +152,7 @@ def main():
     # stitching parameters
     a = 3.5E-5  # m
     P = 0.995  # P = ni(a)/n0 boundary N(x)
+    b = 8
 
     kTi = Ti * 1.6E-19  # J
     kTe = Te * 1.6E-19  # J
@@ -179,7 +180,7 @@ def main():
     Npl = int(a / dx)
 
     ld = m.sqrt(eps0*kTe/e*e*n0)
-    Nsh = int(Nx-8*ld/dx)
+    Nsh = int(Nx-b*ld/dx)
 
     """
     for i in range(0, Npl):
@@ -217,7 +218,7 @@ def main():
     for i in range(0, Nx):
         Ni[i] = 1 + 3 / 19 * (1 - m.sqrt(1 - 19 * Te / 2 / Ti * Ksi[i]))
 
-    Ksi = RKPoisN(dx, Ksi, Nsh, Nx, n0, Ti, Te, V0)
+    Ksi = RKPoisN(dx, Ksi, Nsh, Nx, n0, Ti, Te, V0, b)
 
     for i in range(Nsh, Nx):
         Ni[i] = 2 *m.sqrt(2/3) * m.pow((1 - Te / 4 / Ti * Ksi[i]), -0.5)
