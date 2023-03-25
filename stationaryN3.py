@@ -179,7 +179,7 @@ def main():
     Npl = int(a / dx)
 
     ld = m.sqrt(eps0*kTe/e*e*n0)
-    Nsh = int(Nx-ld/dx)
+    Nsh = int(Nx-8*ld/dx)
 
     """
     for i in range(0, Npl):
