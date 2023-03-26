@@ -109,7 +109,7 @@ def RKPoisN(dx, Ksi, Nsh, Nx, n0, Ti, Te, V0, b):
 
     A = 2 * e * e * n0 / eps0 / kTe * m.exp(e * V0 / kTe)
     B = 32*m.sqrt(2/3)*Ti/Te*e*e*n0/eps0/kTe
-    C = m.pow(1/b/m.sqrt(eps0*kTe/e*e*n0), 2) - 2 * e * e * n0 / eps0 / kTe *m.exp(e*V0/kTe) *m.exp(-(1-Ti/Te)) - 32*m.sqrt(2/3) * Ti / Te * e * e * n0 / eps0 / kTe *m.pow((1+Te/4/Ti*(1-Ti/Te)), 0.5)
+    C = m.pow(1/2/m.sqrt(eps0*kTe/e*e*n0), 2) - 2 * e * e * n0 / eps0 / kTe *m.exp(e*V0/kTe) *m.exp(-(1-Ti/Te)) - 32*m.sqrt(2/3) * Ti / Te * e * e * n0 / eps0 / kTe *m.pow((1+Te/4/Ti*(1-Ti/Te)), 0.5)
 
     # print(A)
     # print(B)
@@ -223,6 +223,35 @@ def main():
     for i in range(Nsh, Nx):
         Ni[i] = 2 *m.sqrt(2/3) * m.pow((1 - Te / 4 / Ti * Ksi[i]), -0.5)
 
+    dKsidx = [0 for k in range(0, Nx)]
+    d2Ksidx2 = [0 for k in range(0, Nx)]
+    d3Ksidx3 = [0 for k in range(0, Nx)]
+
+    for i in range(0, Nx-1):
+        dKsidx[i] = (Ksi[i+1]-Ksi[i])/dx
+
+    dKsidx[Npl] = 0
+    dKsidx[Nsh-1] = 0
+
+    for i in range(0, Nx-1):
+        d2Ksidx2[i] = (dKsidx[i + 1] - dKsidx[i]) / dx
+
+    d2Ksidx2[Npl-1] = 0
+    d2Ksidx2[Nsh - 1] = 0
+    d2Ksidx2[Nx - 2] = 0
+    d2Ksidx2[Nx-1] = 0
+
+    for i in range(0, Nx-1):
+        d3Ksidx3[i] = (d2Ksidx2[i + 1] - d2Ksidx2[i]) / dx
+
+    d3Ksidx3[0] = 0
+    d3Ksidx3[Npl - 2] = 0
+    d3Ksidx3[Npl - 1] = 0
+    d3Ksidx3[Nsh - 1] = 0
+    d3Ksidx3[Nx - 3] = 0
+    d3Ksidx3[Nx - 2] = 0
+    d3Ksidx3[Nx - 1] = 0
+
     # return to V, n
     for i in range(0, Nx):
         V[i] = kTe / e * Ksi[i] + V0
@@ -238,7 +267,18 @@ def main():
     plt.ylabel('N')
     plt.show()
 
+    plt.plot(x, dKsidx)
+    plt.ylabel('dKsidx')
+    plt.show()
 
+    plt.plot(x, d2Ksidx2)
+    plt.ylabel('d2Ksidx2')
+    plt.show()
+
+    plt.plot(x, d3Ksidx3)
+    plt.ylabel('d3Ksidx3')
+    plt.show()
+    """
     plt.plot(x, ne, 'b')
     plt.plot(x, ni, 'r')
     plt.ylabel('N')
@@ -255,7 +295,7 @@ def main():
     plt.plot(x, ui)
     plt.ylabel('u')
     plt.show()
-
+    """
     return 0
 
 
