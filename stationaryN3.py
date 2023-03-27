@@ -259,6 +259,7 @@ def main():
         ui[i] = n0 * m.sqrt(kTi / mi) / ni[i]
         ne[i] = n0 * m.exp(e * V[i] / kTe)
 
+    """
     plt.plot(x, Ksi)
     plt.ylabel('Ksi')
     plt.show()
@@ -295,7 +296,7 @@ def main():
     plt.plot(x, ui)
     plt.ylabel('u')
     plt.show()
-    """
+
     return 0
 
 
