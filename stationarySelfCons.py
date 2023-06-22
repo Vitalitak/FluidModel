@@ -262,6 +262,7 @@ def main():
 
     # plt.plot(x, ue, 'b')
     plt.plot(x, ui, 'r')
+    plt.plot(x, ue, 'b')
     plt.ylabel('u')
     plt.xlabel('x')
     plt.show()
