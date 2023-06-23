@@ -80,8 +80,8 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001
-    Ui[0] = 6.25  # # adjusted value
-    Ue[0] = 0.0031
+    Ui[0] = 2  # # adjusted value
+    Ue[0] = 0.001
 
     print(Ni[0])
     Uith = m.sqrt(gammai * kTi / mi)
@@ -189,7 +189,7 @@ def main():
     nui = 0
     # nue = 4e12
     nue = 0
-    nuiz = 1e5  # adjusted value
+    nuiz = 6e6  # adjusted value
     # nuiz = 0
 
     kTi = Ti * 1.6E-19  # J
