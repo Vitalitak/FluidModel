@@ -80,7 +80,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001
-    Ui[0] = 10  # # adjusted value
+    Ui[0] = 7  # # adjusted value
     Ue[0] = 0.001
 
     print(Ni[0])
@@ -168,7 +168,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 
 def main():
     # initialisation of parameters
-    boxsize = 4E-4  # m
+    boxsize = 8E-4  # m
     dx = 1E-7
     Nx = int(boxsize / dx)
     Nsh = 0
@@ -284,6 +284,11 @@ def main():
 
     f = open("ui.txt", "w")
     for d in ui:
+        f.write(f"{d}\n")
+    f.close()
+
+    f = open("ue.txt", "w")
+    for d in ue:
         f.write(f"{d}\n")
     f.close()
 
