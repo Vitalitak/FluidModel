@@ -80,8 +80,8 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001
-    Ui[0] = 7  # # adjusted value
-    Ue[0] = 0.001
+    Ui[0] = 6.25  # # adjusted value
+    Ue[0] = 0.0031
 
     print(Ni[0])
     Uith = m.sqrt(gammai * kTi / mi)
@@ -150,7 +150,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
         Ue[i+1] = Ue[i] + 1 / 6 * (f1 + 2 * f2 + 2 * f3 + f4)
 
         i = i + 1
-
+    """
     plt.plot(pcheck1, 'b')
     plt.ylabel('p chisl')
     # plt.ylabel('Ni')
@@ -160,7 +160,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     plt.ylabel('p znam')
     # plt.ylabel('expPsi')
     plt.show()
-
+    """
     Nel = i + 1
 
     return V, E, Ni, Ne, Ui, Ue, Nel
@@ -168,7 +168,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 
 def main():
     # initialisation of parameters
-    boxsize = 8E-4  # m
+    boxsize = 1.5E-3  # m
     dx = 1E-6
     Nx = int(boxsize / dx)
     Nsh = 0
@@ -201,6 +201,8 @@ def main():
     ne = np.zeros(Nx)
     ui = np.zeros(Nx)
     ue = np.zeros(Nx)
+    ji = np.zeros(Nx)
+    je = np.zeros(Nx)
 
     Psi = np.zeros(Nx)
     Ni = np.zeros(Nx)
@@ -220,6 +222,8 @@ def main():
         #ne[i] = n0 * m.exp(e * V[i] / kTe)
         ui[i] = Ui[i] * m.sqrt(gammai * kTi / mi)
         ue[i] = Ue[i] * m.sqrt(gammae * kTe / me)
+        ji[i] = ni[i] * ui[i]
+        je[i] = ne[i] * ue[i]
         # ui[i] = n0 * m.sqrt(kTi / mi) / ni[i]
         # ue[i] = n0 * m.sqrt(kTe / me) / ne[i]
     """
@@ -264,6 +268,12 @@ def main():
     plt.plot(x, ui, 'r')
     plt.plot(x, ue, 'b')
     plt.ylabel('u')
+    plt.xlabel('x')
+    plt.show()
+
+    plt.plot(x, ji, 'r')
+    plt.plot(x, je, 'b')
+    plt.ylabel('j')
     plt.xlabel('x')
     plt.show()
 
