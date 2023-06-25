@@ -111,7 +111,7 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     Explicit conservative upwind scheme
     """
     # dt = 1E-11  # s
-    dx = 1E-6
+    dx = 1E-5
     e = 1.6E-19
     mi = 6.68E-26  # kg
     gamma = 1
@@ -196,7 +196,7 @@ def continuity(u, nprev, V, n0, kTe, nuiz, Nel, Nsh, Nx, dt):
 
     # dt = 1E-11  # s
     e = 1.6E-19
-    dx = 1E-6
+    dx = 1E-5
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
 
@@ -269,7 +269,7 @@ def concentration_e(V, kTe, n0, Nel, Nx):
     Boltzmann distribution for electrons
     """
 
-    dx = 1E-6
+    dx = 1E-5
     e = 1.6E-19
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
@@ -284,10 +284,10 @@ def concentration_e(V, kTe, n0, Nel, Nx):
 
 def main():
     # initialisation of parameters
-    boxsize = 8E-4  # m
+    boxsize = 2E-3  # m
     # a = 1E-6
     dt = 1E-13  # s
-    dx = 1E-6
+    dx = 1E-5
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
@@ -307,12 +307,12 @@ def main():
     C0 = 3e-6  # F
     S = 1e-2  # m^2 electrode area
     C = C0 / S
-    gamma = 3
-    nuiz = 3.3e7
+    gamma = 1
+    nuiz = 5e6
     Arf = 0
     w = 13560000  # Hz
 
-    Nt = 23
+    Nt = 0
 
     print(Nt)
     print(int((Nper - 2) / w / dt))
@@ -365,10 +365,18 @@ def main():
     f4.close()
     i = 0
 
-    with open("Nel.txt", "r") as f5:
+    with open("ue.txt", "r") as f5:
         for line in f5.readlines():
-            Nel = int(line)
+            for ind in line.split():
+                ue[i] = float(ind)
+                i += 1
     f5.close()
+    i = 0
+
+    with open("Nel.txt", "r") as f6:
+        for line in f6.readlines():
+            Nel = int(line)
+    f6.close()
 
     """
     # initial conditions for ue
@@ -406,6 +414,8 @@ def main():
     P = np.zeros(int(2 * Nt + 1))
     Pav = np.zeros(int(Nper))
     time = np.arange(2 * Nt + 1) * dt
+
+
 
     q = 0
     # Vel = V[Nel-1] - 10 * m.sin(13560000*2*m.pi*dt)+q
