@@ -54,16 +54,16 @@ def Pois(ne, ni, Vprev, Ve, n0, dx, Nel, Nsh, Nx):
         b[i] = (-b[i-1] - e / eps0 * (ni[i] - ne[i]) * dx * dx)/(-2+a[i-1])
     """
 
-    for i in range(0, Nsh):
+    for i in range(0, Nsh-1):
         V[i] = Vprev[i]
         a[i] = 0
         b[i] = 0
     a[Nsh] = 0
-    b[Nsh] = Vprev[Nsh]
+    b[Nsh] = Vprev[Nsh-1]
     # a[Nsh] = 1
     # b[Nsh] = V[Nsh-1]-V[Nsh]
 
-    for i in range(Nsh + 1, Nel - 1):
+    for i in range(Nsh, Nel - 1):
         # a[i] = -1 / (-2 + a[i - 1])
         a[i] = -1 / (-2 + a[i - 1])
         # b[i] = (-b[i - 1] - e / eps0 * (ni[i] - ne[i]) * dx * dx) / (-2 + a[i - 1])
@@ -86,7 +86,7 @@ def Pois(ne, ni, Vprev, Ve, n0, dx, Nel, Nsh, Nx):
 
     # backward
     V[Nel - 1] = b[Nel - 1]
-    for i in range(Nel - 1, Nsh, -1):
+    for i in range(Nel - 1, Nsh-1, -1):
         V[i - 1] = a[i - 1] * V[i] + b[i - 1]
 
     """
@@ -256,9 +256,9 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
 
     #print(- kTe / me * (n[Nel-3] ** (gamma - 2)) * (n[Nel-2] - n[Nel - 4]) / 2 / dx)
     """
-    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx -
-                                        kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx -
-                                        uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx
+                                        -kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx 
+                                        -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
     """
 
     u[Nel - 1] = uprev[Nel - 1]
@@ -360,10 +360,11 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     n = np.zeros(Nx)
 
     n[0:Nsh] = nprev[0:Nsh]
-    #n[0:Nsh] = nprev[0:Nsh] - dt * ((nprev[1:Nsh+1] * u[1:Nsh+1] - nprev[0:Nsh] * u[0:Nsh]) / dx - nuiz * nprev[0:Nsh])
-    #n[0:Nsh] = nprev[0:Nsh] - dt * (nprev[0:Nsh] * (-3 * u[0:Nsh] + 4 * u[1:Nsh+1] - u[2:Nsh+2]) / 2 / dx +
-                                        #u[0:Nsh] * (-3 * nprev[0:Nsh] + 4 * nprev[1:Nsh+1] - nprev[2:Nsh+2]) / 2 / dx)
-
+    """
+    n[0:Nsh] = nprev[0:Nsh] - dt * (nprev[0:Nsh] * (-3 * u[0:Nsh] + 4 * u[1:Nsh+1] - u[2:Nsh+2]) / 2 / dx +
+                                        u[0:Nsh] * (-3 * nprev[0:Nsh] + 4 * nprev[1:Nsh+1] - nprev[2:Nsh+2]) / 2 / dx
+                                    - nuiz * nprev[0:Nsh])
+    """
     """
     for i in range(Nsh, Nel):
         n[i] = nprev[i] - dt * ((nprev[i]*u[i]-nprev[i-1]*u[i-1])/dx)
