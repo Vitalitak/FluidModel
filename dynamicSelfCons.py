@@ -177,10 +177,12 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     # print(Psi[Nsh-1:Nel-1])
     # print(Psi[Nsh:Nel])
     # print(N[Nsh:Nel] ** (gamma - 2))
-    u[Nsh:Nel] = uprev[Nsh:Nel] + dt * (
-                -kTe / mi * (Psi[Nsh:Nel] - Psi[Nsh - 1:Nel - 1]) / dx - kTi / mi * (N[Nsh:Nel] ** (gamma - 2)) * (
-                N[Nsh:Nel] - N[Nsh - 1:Nel - 1]) / dx - (
-                            uprev[Nsh:Nel] * uprev[Nsh:Nel] - uprev[Nsh - 1:Nel - 1] * uprev[Nsh - 1:Nel - 1]) / 2 / dx)
+    u[Nsh:Nel-1] = uprev[Nsh:Nel-1] + dt * (-e / mi * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
+                                            - kTi / mi / n[Nsh:Nel - 1] * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
+                                            - uprev[Nsh:Nel-1] * (uprev[Nsh+1:Nel] - uprev[Nsh - 1:Nel - 2]) / 2 / dx)
+    u[Nel - 1] = uprev[Nel - 1] + dt * (-e / mi * (V[Nel-1] - V[Nel - 2]) / dx
+                                                - kTi / mi / n[Nel - 1] * (n[Nel-1] - n[Nel - 2]) / dx
+                                                - uprev[Nel - 1] * (uprev[Nel-1] - uprev[Nel - 2]) / dx)
 
     return u
 
@@ -254,11 +256,11 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
 
     #print(- kTe / me * (n[Nel-3] ** (gamma - 2)) * (n[Nel-2] - n[Nel - 4]) / 2 / dx)
     """
-    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx - kTe / me * (
-                n[Nel - 1] ** (gamma - 2)) * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx - uprev[Nel - 1] * (3*
-                    uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
-
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx -
+                                        kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx -
+                                        uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
     """
+
     u[Nel - 1] = uprev[Nel - 1]
     #print(- kTe / me * (n[Nel - 1] ** (gamma - 2)) * (n[Nel-1] - n[Nel - 2]) / dx)
 
@@ -332,10 +334,18 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
         #print(((nprev[i]-nprev[i-1])*u[i]+(u[i]-u[i-1])*nprev[i]))
     """
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
+    """
     n[Nsh:Nel] = nprev[Nsh:Nel] - dt * (
             (nprev[Nsh:Nel] * u[Nsh:Nel] - nprev[Nsh - 1:Nel - 1] * u[Nsh - 1:Nel - 1]) / dx - nuiz * ne[Nsh:Nel])
+    """
+    n[Nsh:Nel - 1] = nprev[Nsh:Nel - 1] - dt * (nprev[Nsh:Nel - 1] * (u[Nsh + 1:Nel] - u[Nsh - 1:Nel - 2]) / 2 / dx +
+                                                u[Nsh:Nel - 1] * (nprev[Nsh + 1:Nel] - nprev[Nsh - 1:Nel - 2]) / 2 / dx
+                                                - nuiz * ne[Nsh:Nel - 1])
 
-    # print(((nprev[3] - nprev[2]) * u[3] + (u[3] - u[2]) * nprev[3]))
+    n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel - 1] * (3 * u[Nel - 1] - 4 * u[Nel - 2] + u[Nel - 3]) / 2 / dx +
+                                        u[Nel - 1] * (3 * nprev[Nel - 1] - 4 * nprev[Nel - 2] + nprev[Nel - 3]) / 2 / dx
+                                        - nuiz * ne[Nel - 1])
+
     return n
 
 
@@ -360,19 +370,21 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
         #print(((nprev[i]-nprev[i-1])*u[i]+(u[i]-u[i-1])*nprev[i]))
     """
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
-
+    """
     n[Nsh:Nel-1] = nprev[Nsh:Nel-1] - dt * (
             (nprev[Nsh+1:Nel] * u[Nsh+1:Nel] - nprev[Nsh - 1:Nel - 2] * u[Nsh - 1:Nel - 2]) / 2 / dx - nuiz * nprev[Nsh:Nel-1])
 
     n[Nel-1] = nprev[Nel-1] - dt * ((nprev[Nel-1] * u[Nel-1] - nprev[Nel - 2] * u[Nel - 2]) / dx - nuiz * nprev[Nel-1])
-
     """
+
     n[Nsh:Nel - 1] = nprev[Nsh:Nel - 1] - dt * (nprev[Nsh:Nel-1]*(u[Nsh + 1:Nel]-u[Nsh - 1:Nel - 2])/2/dx+
-                                                u[Nsh:Nel-1]*(nprev[Nsh+1:Nel]-nprev[Nsh - 1:Nel - 2])/2/dx)
+                                                u[Nsh:Nel-1]*(nprev[Nsh+1:Nel]-nprev[Nsh - 1:Nel - 2])/2/dx
+                                                - nuiz * nprev[Nsh:Nel-1])
 
     n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel-1]*(3*u[Nel-1]-4*u[Nel-2]+u[Nel-3])/2/dx +
-                                        u[Nel-1]*(3*nprev[Nel-1]-4*nprev[Nel-2]+nprev[Nel-3])/2/dx)
-    """
+                                        u[Nel-1]*(3*nprev[Nel-1]-4*nprev[Nel-2]+nprev[Nel-3])/2/dx
+                                        - nuiz * nprev[Nel-1])
+
     return n
 
 
@@ -385,7 +397,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.017
+    Nper = 0.2
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
