@@ -156,30 +156,21 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     """
 
     # Explicit conservative upwind scheme
-    """
-    u[0] = uprev[0]
-    u[1] = uprev[1]
-    u[2] = uprev[2]
-    """
-    """
-    for i in range(0, Nsh):
-        u[i] = uprev[i]
 
-    for i in range(Nsh, Nel):
-        u[i] = uprev[i] + dt * (-kTe / mi * (Psi[i] - Psi[i - 1]) / dx - kTi / mi * m.pow(N[i], gamma - 2) * (
-                    N[i] - N[i - 1]) / dx - (uprev[i] * uprev[i] - uprev[i - 1] * uprev[i - 1]) / dx)
-        #print(dt * (-kTe / mi * (Psi[Nel-1] - Psi[Nel-2]) / dx - kTi / mi * m.pow(N[Nel-1], gamma - 2) * (
-                    #N[Nel-1] - N[Nel-2]) / dx - (uprev[Nel-1] * uprev[Nel-1] - uprev[Nel-2] * uprev[Nel-2]) / dx))
-    #print(dt * (-kTe / mi * (Psi[Nel - 1] - Psi[Nel - 2]) / dx - kTi / mi * m.pow(N[Nel - 1], gamma - 2) * (
-            #N[Nel - 1] - N[Nel - 2]) / dx - (uprev[Nel - 1] * uprev[Nel - 1] - uprev[Nel - 2] * uprev[Nel - 2]) / dx))
+    #u[0:Nsh] = uprev[0:Nsh]
+
+    u[0] = uprev[0]
     """
-    u[0:Nsh] = uprev[0:Nsh]
-    # print(Psi[Nsh-1:Nel-1])
-    # print(Psi[Nsh:Nel])
-    # print(N[Nsh:Nel] ** (gamma - 2))
-    u[Nsh:Nel-1] = uprev[Nsh:Nel-1] + dt * (-e / mi * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
-                                            - kTi / mi / n[Nsh:Nel - 1] * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
-                                            - uprev[Nsh:Nel-1] * (uprev[Nsh+1:Nel] - uprev[Nsh - 1:Nel - 2]) / 2 / dx)
+    u[Nsh:Nel - 1] = uprev[Nsh:Nel - 1] + dt * (-e / mi * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
+                                                - kTi / mi / n[Nsh:Nel - 1] * (
+                                                            n[Nsh + 1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
+                                                - uprev[Nsh:Nel - 1] * (
+                                                            uprev[Nsh + 1:Nel] - uprev[Nsh - 1:Nel - 2]) / 2 / dx)
+    """
+    u[1:Nel-1] = uprev[1:Nel-1] + dt * (-e / mi * (V[2:Nel] - V[0:Nel - 2]) / 2 / dx
+                                            - kTi / mi / n[1:Nel - 1] * (n[2:Nel] - n[0:Nel - 2]) / 2 / dx
+                                            - uprev[1:Nel-1] * (uprev[2:Nel] - uprev[0:Nel - 2]) / 2 / dx)
+
     u[Nel - 1] = uprev[Nel - 1] + dt * (-e / mi * (V[Nel-1] - V[Nel - 2]) / dx
                                                 - kTi / mi / n[Nel - 1] * (n[Nel-1] - n[Nel - 2]) / dx
                                                 - uprev[Nel - 1] * (uprev[Nel-1] - uprev[Nel - 2]) / dx)
@@ -237,32 +228,41 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
 
     # Explicit conservative upwind scheme
 
-    u[0:Nsh] = uprev[0:Nsh]
+    #u[0:Nsh] = uprev[0:Nsh]
+    u[0] = uprev[0]
     """
     u[Nsh:Nel-1] = uprev[Nsh:Nel-1] + dt * (e / me * (V[Nsh+1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                             - kTe / me * (n[Nsh:Nel-1] ** (gamma - 2)) * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
                                             - (uprev[Nsh+1:Nel] ** 2 - uprev[Nsh - 1:Nel - 2] ** 2) / 4 / dx)
     """
+    u[1:Nel - 1] = uprev[1:Nel - 1] + dt * (e / me * (V[2:Nel] - V[0:Nel - 2]) / 2 / dx
+                                                - kTe / me / n[1:Nel - 1] * (n[2:Nel] - n[0:Nel - 2]) / 2 / dx
+                                                - uprev[1:Nel - 1]*(uprev[2:Nel] - uprev[0:Nel - 2]) / 2 / dx)
+    """
     u[Nsh:Nel - 1] = uprev[Nsh:Nel - 1] + dt * (e / me * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
-                                                - kTe / me / n[Nsh:Nel - 1] * (n[Nsh + 1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
-                                                - uprev[Nsh:Nel - 1]*(uprev[Nsh + 1:Nel] - uprev[Nsh - 1:Nel - 2]) / 2 / dx)
-
+                                                - kTe / me / n[Nsh:Nel - 1] * (
+                                                            n[Nsh + 1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
+                                                - uprev[Nsh:Nel - 1] * (
+                                                            uprev[Nsh + 1:Nel] - uprev[Nsh - 1:Nel - 2]) / 2 / dx)
+    """
     """
     u[Nsh:Nel] = uprev[Nsh:Nel] + dt * (e / me * (V[Nsh:Nel] - V[Nsh - 1:Nel - 1]) / dx
                                                 - kTe / me * (n[Nsh:Nel] ** (gamma - 2)) * (
                                                             n[Nsh:Nel] - n[Nsh - 1:Nel - 1]) / dx
                                                 - (uprev[Nsh:Nel] ** 2 - uprev[Nsh - 1:Nel - 1] ** 2) / 2 / dx)
     """
-
-    #print(- kTe / me * (n[Nel-3] ** (gamma - 2)) * (n[Nel-2] - n[Nel - 4]) / 2 / dx)
     """
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx
                                         -kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx 
                                         -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
     """
 
-    u[Nel - 1] = uprev[Nel - 1]
-    #print(- kTe / me * (n[Nel - 1] ** (gamma - 2)) * (n[Nel-1] - n[Nel - 2]) / dx)
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel - 1] - V[Nel - 2]) / dx
+                                        - kTe / me / n[Nel - 1] * (n[Nel - 1] - n[Nel - 2]) / dx
+                                        - uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
+
+    #u[Nel - 1] = uprev[Nel - 1]
+
 
     return u
 
@@ -319,28 +319,18 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
     """
 
     # Explicit conservative upwind scheme
-    """
-    n[0] = nprev[0]
-    n[1] = nprev[1]
-    n[2] = nprev[2]
-    """
-    # for i in range(0, Nsh):
-    # n[i] = nprev[i]
 
-    n[0:Nsh] = nprev[0:Nsh]
-    """
-    for i in range(Nsh, Nel):
-        n[i] = nprev[i] - dt * ((nprev[i]*u[i]-nprev[i-1]*u[i-1])/dx)
-        #print(((nprev[i]-nprev[i-1])*u[i]+(u[i]-u[i-1])*nprev[i]))
-    """
-    # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
-    """
-    n[Nsh:Nel] = nprev[Nsh:Nel] - dt * (
-            (nprev[Nsh:Nel] * u[Nsh:Nel] - nprev[Nsh - 1:Nel - 1] * u[Nsh - 1:Nel - 1]) / dx - nuiz * ne[Nsh:Nel])
+    #n[0:Nsh] = nprev[0:Nsh]
+    n[0] = nprev[0]
+
     """
     n[Nsh:Nel - 1] = nprev[Nsh:Nel - 1] - dt * (nprev[Nsh:Nel - 1] * (u[Nsh + 1:Nel] - u[Nsh - 1:Nel - 2]) / 2 / dx +
                                                 u[Nsh:Nel - 1] * (nprev[Nsh + 1:Nel] - nprev[Nsh - 1:Nel - 2]) / 2 / dx
                                                 - nuiz * ne[Nsh:Nel - 1])
+    """
+    n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[2:Nel] - u[0:Nel - 2]) / 2 / dx +
+                                                u[1:Nel - 1] * (nprev[2:Nel] - nprev[0:Nel - 2]) / 2 / dx
+                                                - nuiz * ne[1:Nel - 1])
 
     n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel - 1] * (3 * u[Nel - 1] - 4 * u[Nel - 2] + u[Nel - 3]) / 2 / dx +
                                         u[Nel - 1] * (3 * nprev[Nel - 1] - 4 * nprev[Nel - 2] + nprev[Nel - 3]) / 2 / dx
@@ -359,17 +349,17 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
 
-    n[0:Nsh] = nprev[0:Nsh]
+    #n[0:Nsh] = nprev[0:Nsh]
+    n[0] = nprev[0]
     """
     n[0:Nsh] = nprev[0:Nsh] - dt * (nprev[0:Nsh] * (-3 * u[0:Nsh] + 4 * u[1:Nsh+1] - u[2:Nsh+2]) / 2 / dx +
                                         u[0:Nsh] * (-3 * nprev[0:Nsh] + 4 * nprev[1:Nsh+1] - nprev[2:Nsh+2]) / 2 / dx
                                     - nuiz * nprev[0:Nsh])
     """
-    """
-    for i in range(Nsh, Nel):
-        n[i] = nprev[i] - dt * ((nprev[i]*u[i]-nprev[i-1]*u[i-1])/dx)
-        #print(((nprev[i]-nprev[i-1])*u[i]+(u[i]-u[i-1])*nprev[i]))
-    """
+    n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel-1]*(u[2:Nel]-u[0:Nel - 2])/2/dx+
+                                                u[1:Nel-1]*(nprev[2:Nel]-nprev[0:Nel - 2])/2/dx
+                                                - nuiz * nprev[1:Nel-1])
+
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
     """
     n[Nsh:Nel-1] = nprev[Nsh:Nel-1] - dt * (
@@ -377,11 +367,11 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
 
     n[Nel-1] = nprev[Nel-1] - dt * ((nprev[Nel-1] * u[Nel-1] - nprev[Nel - 2] * u[Nel - 2]) / dx - nuiz * nprev[Nel-1])
     """
-
+    """
     n[Nsh:Nel - 1] = nprev[Nsh:Nel - 1] - dt * (nprev[Nsh:Nel-1]*(u[Nsh + 1:Nel]-u[Nsh - 1:Nel - 2])/2/dx+
                                                 u[Nsh:Nel-1]*(nprev[Nsh+1:Nel]-nprev[Nsh - 1:Nel - 2])/2/dx
                                                 - nuiz * nprev[Nsh:Nel-1])
-
+    """
     n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel-1]*(3*u[Nel-1]-4*u[Nel-2]+u[Nel-3])/2/dx +
                                         u[Nel-1]*(3*nprev[Nel-1]-4*nprev[Nel-2]+nprev[Nel-3])/2/dx
                                         - nuiz * nprev[Nel-1])
@@ -398,7 +388,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.25
+    Nper = 0.65
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -416,11 +406,11 @@ def main():
     C = C0 / S
     gamma = 1
     nuiz = 5e6
-    Arf = 0
+    Arf = -20
     w = 13560000  # Hz
 
     #Nt = 15000
-    Nt = (int((Nper) / w / dt))
+    Nt = (int((Nper) / 2 / w / dt))
 
     print(Nt)
     print(int((Nper - 2) / w / dt))
