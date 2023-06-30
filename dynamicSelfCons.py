@@ -205,14 +205,15 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
 
     # forward
     # boundary conditions on plasma surface: (du/dx)pl = 0
-    #a[0] = -uprev[1] * dt / 4.0 / dx
+    #a[0] = 0
     #b[0] = (V[1] - V[0])/dx/m - uprev[0]/dt
-    a[0] = 1
-    b[0] = 0
+    a[0] = 0
+    b[0] = uprev[0]
 
     for i in range(1, Nel - 1):
         a[i] = -uprev[i+1]*dt / 4.0 / dx / (1 - uprev[i - 1]*dt * a[i-1] / 4.0 / dx)
-        b[i] = (uprev[i-1]*dt / 4.0 / dx * b[i - 1] - kTe/mi*dt*(Psi[i+1]-Psi[i]) /dx - kTi/mi*dt*m.pow(N[i], gamma-2)*(N[i+1]-N[i])/dx + uprev[i]) / (1 - uprev[i - 1]*dt * a[i-1] / 4.0 / dx)
+        b[i] = (uprev[i-1]*dt / 4.0 / dx * b[i - 1] + uprev[i] + dt * (e / me * (V[i+1] - V[i-1]) / 2 / dx
+                                                - kTe / me / n[i] * (n[i+1] - n[i-1]) / 2 / dx)) / (1 - uprev[i - 1]*dt * a[i-1] / 4.0 / dx)
 
     # boundary condition on electrode surface: (du/dx)el = 0
     a[Nel - 1] = 0
@@ -235,9 +236,12 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                             - kTe / me * (n[Nsh:Nel-1] ** (gamma - 2)) * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
                                             - (uprev[Nsh+1:Nel] ** 2 - uprev[Nsh - 1:Nel - 2] ** 2) / 4 / dx)
     """
+
+    #right
     u[1:Nel - 1] = uprev[1:Nel - 1] + dt * (e / me * (V[2:Nel] - V[0:Nel - 2]) / 2 / dx
                                                 - kTe / me / n[1:Nel - 1] * (n[2:Nel] - n[0:Nel - 2]) / 2 / dx
                                                 - uprev[1:Nel - 1]*(uprev[2:Nel] - uprev[0:Nel - 2]) / 2 / dx)
+
     """
     u[Nsh:Nel - 1] = uprev[Nsh:Nel - 1] + dt * (e / me * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                                 - kTe / me / n[Nsh:Nel - 1] * (
@@ -257,6 +261,7 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                         -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
     """
 
+    #right
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel - 1] - V[Nel - 2]) / dx
                                         - kTe / me / n[Nel - 1] * (n[Nel - 1] - n[Nel - 2]) / dx
                                         - uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
