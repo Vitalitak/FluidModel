@@ -159,7 +159,10 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
 
     #u[0:Nsh] = uprev[0:Nsh]
 
-    u[0] = uprev[0]
+    #u[0] = uprev[0]
+    u[0] = uprev[0] + dt * (-e / mi * (V[1] - V[0]) / dx
+                                        - kTi / mi / n[0] * (n[1] - n[0]) / dx
+                                        - uprev[0] * (uprev[1] - uprev[0]) / dx)
     """
     u[Nsh:Nel - 1] = uprev[Nsh:Nel - 1] + dt * (-e / mi * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                                 - kTi / mi / n[Nsh:Nel - 1] * (
@@ -216,10 +219,12 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                                 - kTe / me / n[i] * (n[i+1] - n[i-1]) / 2 / dx)) / (1 - uprev[i - 1]*dt * a[i-1] / 4.0 / dx)
 
     # boundary condition on electrode surface: (du/dx)el = 0
-    a[Nel - 1] = 0
-    #b[Nx - 1] = (-uprev[Nx-2] / 4.0 / dx * b[Nx-2] + (V[Nx-1]-V[Nx-2])/dx - uprev[Nx-1] / dt) / (-1 / dt + uprev[Nx-2] * a[Nx-2] / 4.0 / dx)  # boundary conditions for u (u[Nx-1]-u[Nx-2])
-    #b[Nx - 1] = 0  # (u)p = 0
-    b[Nel - 1] = b[Nel - 2]/(1 - a[Nel - 2])  # (du/dx)el = 0
+    a[Nel - 1] = 1
+    #b[Nel - 1] = b[Nel - 2]/(1 - a[Nel - 2])  # (du/dx)el = 0
+    b[Nel - 1] = (b[Nel - 2] + dt*(e / me * (V[Nel-1] - V[Nel - 2]) / dx
+                                        -kTe / me / n[Nel - 1] * (n[Nel-1] - n[Nel - 2]) / dx)
+                                            + uprev[Nel-2]) / (1 - a[Nel - 2])
+
 
     # backward
     u[Nel - 1] = b[Nel - 1]
@@ -229,8 +234,10 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
 
     # Explicit conservative upwind scheme
 
-    #u[0:Nsh] = uprev[0:Nsh]
-    u[0] = uprev[0]
+    #u[0] = uprev[0]
+    u[0] = uprev[0] + dt * (e / me * (V[1] - V[0]) / dx
+                                        - kTe / me / n[0] * (n[1] - n[0]) / dx
+                                        - uprev[0] * (uprev[1] - uprev[0]) / dx)
     """
     u[Nsh:Nel-1] = uprev[Nsh:Nel-1] + dt * (e / me * (V[Nsh+1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                             - kTe / me * (n[Nsh:Nel-1] ** (gamma - 2)) * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
@@ -257,7 +264,7 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     """
     """
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx
-                                        -kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx 
+                                        -kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx
                                         -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
     """
 
@@ -327,7 +334,9 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
 
     #n[0:Nsh] = nprev[0:Nsh]
     n[0] = nprev[0]
-
+    #n[0] = nprev[0] - dt * (nprev[0] * (-u[0] + u[1]) / dx +
+                                        #u[0] * (-nprev[0] + nprev[1]) / dx
+                                        #- nuiz * ne[0])
     """
     n[Nsh:Nel - 1] = nprev[Nsh:Nel - 1] - dt * (nprev[Nsh:Nel - 1] * (u[Nsh + 1:Nel] - u[Nsh - 1:Nel - 2]) / 2 / dx +
                                                 u[Nsh:Nel - 1] * (nprev[Nsh + 1:Nel] - nprev[Nsh - 1:Nel - 2]) / 2 / dx
@@ -356,6 +365,9 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
 
     #n[0:Nsh] = nprev[0:Nsh]
     n[0] = nprev[0]
+    #n[0] = nprev[0] - dt * (nprev[0] * (-u[0] + u[1]) / dx +
+                                        #u[0] * (-nprev[0] + nprev[1]) / dx
+                                        #- nuiz * nprev[0])
     """
     n[0:Nsh] = nprev[0:Nsh] - dt * (nprev[0:Nsh] * (-3 * u[0:Nsh] + 4 * u[1:Nsh+1] - u[2:Nsh+2]) / 2 / dx +
                                         u[0:Nsh] * (-3 * nprev[0:Nsh] + 4 * nprev[1:Nsh+1] - nprev[2:Nsh+2]) / 2 / dx
@@ -393,7 +405,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.65
+    Nper = 0.68
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
