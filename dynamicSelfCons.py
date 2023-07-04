@@ -174,10 +174,16 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
                                             - kTi / mi / n[1:Nel - 1] * (n[2:Nel] - n[0:Nel - 2]) / 2 / dx
                                             - uprev[1:Nel-1] * (uprev[2:Nel] - uprev[0:Nel - 2]) / 2 / dx)
 
+    # right
     u[Nel - 1] = uprev[Nel - 1] + dt * (-e / mi * (V[Nel-1] - V[Nel - 2]) / dx
                                                 - kTi / mi / n[Nel - 1] * (n[Nel-1] - n[Nel - 2]) / dx
                                                 - uprev[Nel - 1] * (uprev[Nel-1] - uprev[Nel - 2]) / dx)
 
+    """
+    u[Nel - 1] = uprev[Nel - 1] + dt * (-e / mi * (3*V[Nel - 1] - 4* V[Nel - 2] + V[Nel-3]) / 2 / dx
+                                        - kTi / mi / n[Nel - 1] * (3*n[Nel - 1] - 4* n[Nel - 2] + n[Nel-3]) / 2 / dx
+                                        - uprev[Nel - 1] * (3*uprev[Nel - 1] - 4* uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
+    """
     return u
 
 def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
@@ -262,17 +268,18 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                                             n[Nsh:Nel] - n[Nsh - 1:Nel - 1]) / dx
                                                 - (uprev[Nsh:Nel] ** 2 - uprev[Nsh - 1:Nel - 1] ** 2) / 2 / dx)
     """
-    """
-    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel-1] - 4 * V[Nel - 2] + V[Nel - 3]) / 2 / dx
-                                        -kTe / me / n[Nel - 1] * (3 * n[Nel-1] - 4 * n[Nel - 2] + n[Nel-3]) / 2 / dx
-                                        -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel - 3]) / 2 / dx)
-    """
 
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel-1] - V[Nel - 2]) / dx
+                                        -kTe / me / n[Nel - 1] * (n[Nel-1] - n[Nel - 2]) / dx
+                                        -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
+
+    """
     #right
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel - 1] - V[Nel - 2]) / dx
                                         - kTe / me / n[Nel - 1] * (n[Nel - 1] - n[Nel - 2]) / dx
                                         - uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
-
+    """
+    #print(-uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
     #u[Nel - 1] = uprev[Nel - 1]
 
 
@@ -389,10 +396,17 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
                                                 u[Nsh:Nel-1]*(nprev[Nsh+1:Nel]-nprev[Nsh - 1:Nel - 2])/2/dx
                                                 - nuiz * nprev[Nsh:Nel-1])
     """
+
+    # right
     n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel-1]*(3*u[Nel-1]-4*u[Nel-2]+u[Nel-3])/2/dx +
                                         u[Nel-1]*(3*nprev[Nel-1]-4*nprev[Nel-2]+nprev[Nel-3])/2/dx
                                         - nuiz * nprev[Nel-1])
 
+    """
+    n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel - 1] * (u[Nel - 1] - u[Nel - 2]) / dx +
+                                        u[Nel - 1] * (nprev[Nel - 1] - nprev[Nel - 2]) / dx
+                                        - nuiz * nprev[Nel - 1])
+    """
     return n
 
 
@@ -405,7 +419,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.68
+    Nper = 0.75
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
