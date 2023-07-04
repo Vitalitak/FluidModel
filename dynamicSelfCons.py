@@ -60,8 +60,11 @@ def Pois(ne, ni, Vprev, Ve, n0, dx, Nel, Nsh, Nx):
         b[i] = 0
     a[Nsh] = 0
     b[Nsh] = Vprev[Nsh-1]
-    # a[Nsh] = 1
-    # b[Nsh] = V[Nsh-1]-V[Nsh]
+    #a[Nsh] = 1
+    #b[Nsh] = Vprev[Nsh-1]-Vprev[Nsh]
+
+    #a[0] = 1
+    #b[0] = Vprev[0] - Vprev[1]
 
     for i in range(Nsh, Nel - 1):
         # a[i] = -1 / (-2 + a[i - 1])
@@ -341,9 +344,11 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
 
     #n[0:Nsh] = nprev[0:Nsh]
     n[0] = nprev[0]
-    #n[0] = nprev[0] - dt * (nprev[0] * (-u[0] + u[1]) / dx +
-                                        #u[0] * (-nprev[0] + nprev[1]) / dx
-                                        #- nuiz * ne[0])
+    """
+    n[0] = nprev[0] - dt * (nprev[0] * (-3*u[0] + 4*u[1]- u[2]) / 2 / dx +
+                                        u[0] * (-3*nprev[0] + 4*nprev[1]-nprev[2]) / 2 / dx
+                                        - nuiz * ne[0])
+    """
     """
     n[Nsh:Nel - 1] = nprev[Nsh:Nel - 1] - dt * (nprev[Nsh:Nel - 1] * (u[Nsh + 1:Nel] - u[Nsh - 1:Nel - 2]) / 2 / dx +
                                                 u[Nsh:Nel - 1] * (nprev[Nsh + 1:Nel] - nprev[Nsh - 1:Nel - 2]) / 2 / dx
@@ -372,9 +377,11 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
 
     #n[0:Nsh] = nprev[0:Nsh]
     n[0] = nprev[0]
-    #n[0] = nprev[0] - dt * (nprev[0] * (-u[0] + u[1]) / dx +
-                                        #u[0] * (-nprev[0] + nprev[1]) / dx
-                                        #- nuiz * nprev[0])
+    """
+    n[0] = nprev[0] - dt * (nprev[0] * (-3*u[0] + 4*u[1]-u[2]) / 2 / dx +
+                                        u[0] * (-3*nprev[0] + 3*nprev[1]-nprev[2]) / 2 / dx
+                                        - nuiz * nprev[0])
+    """
     """
     n[0:Nsh] = nprev[0:Nsh] - dt * (nprev[0:Nsh] * (-3 * u[0:Nsh] + 4 * u[1:Nsh+1] - u[2:Nsh+2]) / 2 / dx +
                                         u[0:Nsh] * (-3 * nprev[0:Nsh] + 4 * nprev[1:Nsh+1] - nprev[2:Nsh+2]) / 2 / dx
