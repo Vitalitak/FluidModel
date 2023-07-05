@@ -244,9 +244,17 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     # Explicit conservative upwind scheme
 
     #u[0] = uprev[0]
+
+    #right
     u[0] = uprev[0] + dt * (e / me * (V[1] - V[0]) / dx
                                         - kTe / me / n[0] * (n[1] - n[0]) / dx
                                         - uprev[0] * (uprev[1] - uprev[0]) / dx)
+
+    """
+    u[0] = uprev[0] + dt * (e / me * (-3*V[0]+4*V[1] - V[2]) / 2 / dx
+                            - kTe / me / n[0] * (-3*n[0]+4*n[1] - n[2]) / 2 / dx
+                            - uprev[0] * (-3*uprev[0]+4*uprev[1] - uprev[2])/2 / dx)
+    """
     """
     u[Nsh:Nel-1] = uprev[Nsh:Nel-1] + dt * (e / me * (V[Nsh+1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                             - kTe / me * (n[Nsh:Nel-1] ** (gamma - 2)) * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
@@ -272,17 +280,27 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                                 - (uprev[Nsh:Nel] ** 2 - uprev[Nsh - 1:Nel - 1] ** 2) / 2 / dx)
     """
 
+    # right last
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel-1] - V[Nel - 2]) / dx
                                         -kTe / me / n[Nel - 1] * (n[Nel-1] - n[Nel - 2]) / dx
                                         -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
 
+    """
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel - 1] - 4*V[Nel - 2]+V[Nel-3])/ 2 / dx
+                                        - kTe / me / n[Nel - 1] * (3*n[Nel - 1] - 4* n[Nel - 2]+n[Nel-3]) / 2 / dx
+                                        - uprev[Nel - 1] * (
+                                                    3 * uprev[Nel - 1] - 4 * uprev[Nel - 2] + uprev[Nel - 3]) / 2 / dx)
+    """
     """
     #right
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel - 1] - V[Nel - 2]) / dx
                                         - kTe / me / n[Nel - 1] * (n[Nel - 1] - n[Nel - 2]) / dx
                                         - uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
     """
-    #print(-uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
+
+    #print(e / me * (V[Nel - 1] - V[Nel - 2]) / dx
+                                        #- kTe / me / n[Nel - 1] * (n[Nel - 1] - n[Nel - 2]) / dx
+                                        #- uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
     #u[Nel - 1] = uprev[Nel - 1]
 
 
@@ -354,9 +372,15 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
                                                 u[Nsh:Nel - 1] * (nprev[Nsh + 1:Nel] - nprev[Nsh - 1:Nel - 2]) / 2 / dx
                                                 - nuiz * ne[Nsh:Nel - 1])
     """
+    """
+    #right
     n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[2:Nel] - u[0:Nel - 2]) / 2 / dx +
                                                 u[1:Nel - 1] * (nprev[2:Nel] - nprev[0:Nel - 2]) / 2 / dx
                                                 - nuiz * ne[1:Nel - 1])
+    """
+    n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[2:Nel] - u[0:Nel - 2]) / 2 / dx +
+                                            u[1:Nel - 1] * (nprev[1:Nel-1] - nprev[0:Nel - 2])/ dx
+                                            - nuiz * ne[1:Nel - 1])
 
     n[Nel - 1] = nprev[Nel - 1] - dt * (nprev[Nel - 1] * (3 * u[Nel - 1] - 4 * u[Nel - 2] + u[Nel - 3]) / 2 / dx +
                                         u[Nel - 1] * (3 * nprev[Nel - 1] - 4 * nprev[Nel - 2] + nprev[Nel - 3]) / 2 / dx
@@ -379,7 +403,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     n[0] = nprev[0]
     """
     n[0] = nprev[0] - dt * (nprev[0] * (-3*u[0] + 4*u[1]-u[2]) / 2 / dx +
-                                        u[0] * (-3*nprev[0] + 3*nprev[1]-nprev[2]) / 2 / dx
+                                        u[0] * (-3*nprev[0] + 4*nprev[1]-nprev[2]) / 2 / dx
                                         - nuiz * nprev[0])
     """
     """
@@ -387,9 +411,21 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
                                         u[0:Nsh] * (-3 * nprev[0:Nsh] + 4 * nprev[1:Nsh+1] - nprev[2:Nsh+2]) / 2 / dx
                                     - nuiz * nprev[0:Nsh])
     """
+    """
+    n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[1:Nel-1] - u[0:Nel - 2]) / dx +
+                                            u[1:Nel - 1] * (nprev[2:Nel] - nprev[0:Nel - 2]) / 2 / dx
+                                            - nuiz * nprev[1:Nel - 1])
+    """
+    """
+    #right
     n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel-1]*(u[2:Nel]-u[0:Nel - 2])/2/dx+
                                                 u[1:Nel-1]*(nprev[2:Nel]-nprev[0:Nel - 2])/2/dx
                                                 - nuiz * nprev[1:Nel-1])
+    """
+    n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[2:Nel] - u[0:Nel - 2]) / 2 / dx +
+                                            u[1:Nel - 1] * (nprev[1:Nel-1] - nprev[0:Nel - 2]) / dx
+                                            - nuiz * nprev[1:Nel - 1])
+
 
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
     """
@@ -426,7 +462,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.75
+    Nper = 1
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -685,8 +721,9 @@ def main():
     plt.plot(x, f1, 'r')
     plt.plot(x, f2, 'b')
     plt.plot(x, f3, 'm')
+    plt.plot(x, f1+f2+f3, 'g')
 
-    plt.ylabel('d2V/dx2')
+    plt.ylabel('du')
     plt.show()
 
     # graph plot
