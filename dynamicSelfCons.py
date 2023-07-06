@@ -53,7 +53,8 @@ def Pois(ne, ni, Vprev, Ve, n0, dx, Nel, Nsh, Nx):
         a[i] = -1 / (-2+a[i-1])
         b[i] = (-b[i-1] - e / eps0 * (ni[i] - ne[i]) * dx * dx)/(-2+a[i-1])
     """
-
+    """
+    #right
     for i in range(0, Nsh-1):
         V[i] = Vprev[i]
         a[i] = 0
@@ -71,6 +72,15 @@ def Pois(ne, ni, Vprev, Ve, n0, dx, Nel, Nsh, Nx):
         a[i] = -1 / (-2 + a[i - 1])
         # b[i] = (-b[i - 1] - e / eps0 * (ni[i] - ne[i]) * dx * dx) / (-2 + a[i - 1])
         b[i] = (-b[i - 1] - e / eps0 * (ni[i] - ne[i]) * dx * dx) / (-2 + a[i - 1])
+    """
+    a[0] = 0
+    b[0] = Vprev[0]
+    #a[0] = 1
+    #b[0] = Vprev[0] - Vprev[1]
+
+    for i in range(1, Nel - 1):
+        a[i] = -1 / (-2 + a[i - 1])
+        b[i] = (-b[i - 1] - e / eps0 * (ni[i] - ne[i]) * dx * dx) / (-2 + a[i - 1])
 
     """
     V[0:Nsh] = Vprev[0:Nsh]
@@ -87,11 +97,16 @@ def Pois(ne, ni, Vprev, Ve, n0, dx, Nel, Nsh, Nx):
     b[Nel - 1] = Ve  # (V)p = 0
     # print(b)
 
+    """
+    #right
     # backward
     V[Nel - 1] = b[Nel - 1]
     for i in range(Nel - 1, Nsh-1, -1):
         V[i - 1] = a[i - 1] * V[i] + b[i - 1]
-
+    """
+    V[Nel - 1] = b[Nel - 1]
+    for i in range(Nel - 1, 0, -1):
+        V[i - 1] = a[i - 1] * V[i] + b[i - 1]
     """
     #print(b[Nel-2:Nsh-1:-1])
 
@@ -425,7 +440,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[2:Nel] - u[0:Nel - 2]) / 2 / dx +
                                             u[1:Nel - 1] * (nprev[1:Nel-1] - nprev[0:Nel - 2]) / dx
                                             - nuiz * nprev[1:Nel - 1])
-
+    #print(nprev[50] * (u[51] - u[49]) / 2 / dx + u[50] * (nprev[50] - nprev[49]) / dx - nuiz * nprev[50])
 
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
     """
@@ -462,7 +477,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 1
+    Nper = 1.3
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
