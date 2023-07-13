@@ -332,9 +332,9 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                         -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
     """
 
-    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel - 1] - 4*V[Nel - 2]+V[Nel-3]) / 2 / dx
-                                        - kTe * gamma / me *(N[Nel-1] ** (gamma-2)) * (N[Nel - 1] - N[Nel - 2]) / dx
-                                        - uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel - 1] - 4*V[Nel - 2] + V[Nel-3]) / 2 / dx
+                                        - kTe * gamma / me *(N[Nel-1] ** (gamma-2)) * (3*N[Nel - 1] - 4*N[Nel - 2] + N[Nel-3]) / 2 / dx
+                                        - uprev[Nel - 1] * (3*uprev[Nel - 1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
     """
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel - 1] - 4*V[Nel - 2]+V[Nel-3])/ 2 / dx
                                         - kTe / me / n[Nel - 1] * (3*n[Nel - 1] - 4* n[Nel - 2]+n[Nel-3]) / 2 / dx
@@ -503,7 +503,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
 
 def main():
     # initialisation of parameters
-    boxsize = 1E-2  # m
+    boxsize = 2E-2  # m
     # a = 1E-6
     dt = 1E-13  # s
     dx = 1E-5
@@ -527,8 +527,8 @@ def main():
     S = 1e-2  # m^2 electrode area
     C = C0 / S
     gamma = 1
-    nuiz = 5e6
-    Arf = -20
+    nuiz = 0.7e6
+    Arf = 0
     w = 13560000  # Hz
 
     #Nt = 15000

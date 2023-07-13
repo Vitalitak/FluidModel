@@ -76,20 +76,25 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     # Ni[0] = m.exp(Psi[0])
     # Ne[0] = m.exp(Psi[0])
     V[0] = -Ti  # adjusted value
-    E[0] = 10  # adjusted value
+    E[0] = 50  # adjusted value
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001
-    Ui[0] = 1.2  # # adjusted value
+    Ui[0] = 1.5  # # adjusted value
     #Ue[0] = 0.00076
     Ue[0] = Ui[0]*m.sqrt(Ti/Te*me/mi)
 
     print(Ni[0])
     Uith = m.sqrt(gammai * kTi / mi)
     Ueth = m.sqrt(gammae * kTe / me)
+    ri = e / mi
+    re = e / me
     # nui=nue=0
     i = 0
 
+
+    """
+    # isothermal gamma = 1
     while (V[i] > Vl) and (i < Nx - 1):
         # print(i)
         k1 = dx * (-E[i])
@@ -152,6 +157,88 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 
         i = i + 1
     """
+
+
+    # adiabatic
+
+    while (V[i] > Vl) and (i < Nx - 1):
+        # print(i)
+        k1 = dx * (-E[i])
+        l1 = dx * e * n0 / eps0 * (Ni[i] - Ne[i])
+        p1 = dx * (-(ri*Ni[i] * E[i] / Uith / Uith / (Ui[i] * Ui[i] - (Ni[i] ** (gammai-1))))
+                   + Ne[i] * Ui[i] * nuiz / Uith / (Ui[i] * Ui[i] - (Ni[i] ** (gammai-1))))
+        h1 = dx * ((re * Ne[i] * E[i] / Ueth / Ueth / (Ue[i] * Ue[i] - (Ne[i] ** (gammae-1))))
+                   + Ne[i] * Ue[i] * nuiz / Ueth / (Ue[i] * Ue[i] - (Ne[i] ** (gammae-1))))
+        m1 = dx * ((ri * Ui[i] * E[i] / Uith / Uith / (Ui[i] * Ui[i] - (Ni[i] ** (gammai-1))))
+                   - Ne[i] * (Ni[i] ** (gammai-2)) * nuiz / Uith / (Ui[i] * Ui[i] - (Ni[i] ** (gammai-1))))
+        f1 = dx * (-(re * Ue[i] * E[i] / Ueth / Ueth / (Ue[i] * Ue[i] - (Ne[i] ** (gammae-1))))
+                   - (Ne[i] ** (gammae-1)) * nuiz / Ueth / (Ue[i] * Ue[i] - (Ne[i] ** (gammae-1))))
+
+        k2 = dx * (-E[i] - l1 / 2)
+        l2 = dx * e * n0 / eps0 * (Ni[i] + p1 / 2 - Ne[i] - h1 / 2)
+        p2 = dx * (-(ri * (Ni[i] + p1 / 2) * (E[i] + l1 / 2) / Uith / Uith / ((Ui[i] + m1 / 2) * (Ui[i] + m1 / 2) - ((Ni[i] + p1 / 2) ** (gammai-1))))
+                   + (Ne[i] + h1 / 2) * (Ui[i] + m1 / 2) * nuiz / Uith / ((Ui[i] + m1 / 2) * (Ui[i] + m1 / 2) - ((Ni[i] + p1 / 2) ** (gammai-1))))
+        h2 = dx * ((re * (Ne[i] + h1 / 2) * (E[i] + l1 / 2) / Ueth / Ueth / ((Ue[i] + f1 / 2) * (Ue[i] + f1 / 2) - ((Ne[i]+h1 / 2) ** (gammae-1))))
+                   + (Ne[i] + h1 / 2) * (Ue[i] + f1 / 2) * nuiz / Ueth / ((Ue[i] + f1 / 2) * (Ue[i] + f1 / 2) - ((Ne[i]+h1 / 2) ** (gammae-1))))
+        m2 = dx * ((ri * (Ui[i] + m1 / 2) * (E[i] + l1 / 2) / Uith / Uith / ((Ui[i] + m1 / 2) * (Ui[i] + m1 / 2) - ((Ni[i] + p1 / 2) ** (gammai-1))))
+                   - (Ne[i] + h1 / 2) * ((Ni[i] + p1 / 2) ** (gammai-2)) * nuiz / Uith / ((Ui[i] + m1 / 2) * (Ui[i] + m1 / 2) - ((Ni[i] + p1 / 2) ** (gammai-1))))
+        f2 = dx * (-(re * (Ue[i] + f1 / 2) * (E[i] + l1 / 2) / Ueth / Ueth / ((Ue[i] + f1 / 2) * (Ue[i] + f1 / 2) - ((Ne[i]+h1 / 2) ** (gammae-1))))
+                   - ((Ne[i]+h1 / 2) ** (gammae-1)) * nuiz / Ueth / ((Ue[i] + f1 / 2) * (Ue[i] + f1 / 2) - ((Ne[i]+h1 / 2) ** (gammae-1))))
+
+        k3 = dx * (-E[i] - l2 / 2)
+        l3 = dx * e * n0 / eps0 * (Ni[i] + p2 / 2 - Ne[i] - h2 / 2)
+        p3 = dx * (-(ri * (Ni[i] + p2 / 2) * (E[i] + l2 / 2) / Uith / Uith / (
+                    (Ui[i] + m2 / 2) * (Ui[i] + m2 / 2) - ((Ni[i] + p2 / 2) ** (gammai - 1))))
+                   + (Ne[i] + h2 / 2) * (Ui[i] + m2 / 2) * nuiz / Uith / (
+                               (Ui[i] + m2 / 2) * (Ui[i] + m2 / 2) - ((Ni[i] + p2 / 2) ** (gammai - 1))))
+        h3 = dx * ((re * (Ne[i] + h2 / 2) * (E[i] + l2 / 2) / Ueth / Ueth / (
+                    (Ue[i] + f2 / 2) * (Ue[i] + f2 / 2) - ((Ne[i] + h2 / 2) ** (gammae - 1))))
+                   + (Ne[i] + h2 / 2) * (Ue[i] + f2 / 2) * nuiz / Ueth / (
+                               (Ue[i] + f2 / 2) * (Ue[i] + f2 / 2) - ((Ne[i] + h2 / 2) ** (gammae - 1))))
+        m3 = dx * ((ri * (Ui[i] + m2 / 2) * (E[i] + l2 / 2) / Uith / Uith / (
+                    (Ui[i] + m2 / 2) * (Ui[i] + m2 / 2) - ((Ni[i] + p2 / 2) ** (gammai - 1))))
+                   - (Ne[i] + h2 / 2) * ((Ni[i] + p2 / 2) ** (gammai - 2)) * nuiz / Uith / (
+                               (Ui[i] + m2 / 2) * (Ui[i] + m2 / 2) - ((Ni[i] + p2 / 2) ** (gammai - 1))))
+        f3 = dx * (-(re * (Ue[i] + f2 / 2) * (E[i] + l2 / 2) / Ueth / Ueth / (
+                    (Ue[i] + f2 / 2) * (Ue[i] + f2 / 2) - ((Ne[i] + h2 / 2) ** (gammae - 1))))
+                   - ((Ne[i] + h2 / 2) ** (gammae - 1)) * nuiz / Ueth / (
+                               (Ue[i] + f2 / 2) * (Ue[i] + f2 / 2) - ((Ne[i] + h2 / 2) ** (gammae - 1))))
+        # done
+        k4 = dx * (-E[i] - l3)
+        l4 = dx * e * n0 / eps0 * (Ni[i] + p3 - Ne[i] - h3)
+        p4 = dx * (-(ri * (Ni[i] + p3) * (E[i] + l3) / Uith / Uith / (
+                (Ui[i] + m3) * (Ui[i] + m3) - ((Ni[i] + p3) ** (gammai - 1))))
+                   + (Ne[i] + h3) * (Ui[i] + m3) * nuiz / Uith / (
+                           (Ui[i] + m3) * (Ui[i] + m3) - ((Ni[i] + p3) ** (gammai - 1))))
+        h4 = dx * ((re * (Ne[i] + h3) * (E[i] + l3) / Ueth / Ueth / (
+                (Ue[i] + f3) * (Ue[i] + f3) - ((Ne[i] + h3) ** (gammae - 1))))
+                   + (Ne[i] + h3) * (Ue[i] + f3) * nuiz / Ueth / (
+                           (Ue[i] + f3) * (Ue[i] + f3) - ((Ne[i] + h3) ** (gammae - 1))))
+        m4 = dx * ((ri * (Ui[i] + m3) * (E[i] + l3) / Uith / Uith / (
+                (Ui[i] + m3) * (Ui[i] + m3) - ((Ni[i] + p3) ** (gammai - 1))))
+                   - (Ne[i] + h3) * ((Ni[i] + p3) ** (gammai - 2)) * nuiz / Uith / (
+                           (Ui[i] + m3) * (Ui[i] + m3) - ((Ni[i] + p3) ** (gammai - 1))))
+        f4 = dx * (-(re * (Ue[i] + f3) * (E[i] + l3) / Ueth / Ueth / (
+                (Ue[i] + f3) * (Ue[i] + f3) - ((Ne[i] + h3) ** (gammae - 1))))
+                   - ((Ne[i] + h3) ** (gammae - 1)) * nuiz / Ueth / (
+                           (Ue[i] + f3) * (Ue[i] + f3) - ((Ne[i] + h3) ** (gammae - 1))))
+
+        # pcheck1[i] = kTe*Delta[i]*Ni[i]-m.sqrt(mi*kTi)*nu
+        # pcheck2[i] = gammai * m.pow(Ni[i], gammai+1) - 1
+        # lcheck1[i] = Ni[i]
+        # lcheck2[i] = m.exp(Psi[i])
+        # print(p1)
+        # print(B * quad(FN, Psi0, Psi[i]+ dx * f3)[0])
+        V[i + 1] = V[i] + 1 / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+        E[i + 1] = E[i] + 1 / 6 * (l1 + 2 * l2 + 2 * l3 + l4)
+        Ni[i + 1] = Ni[i] + 1 / 6 * (p1 + 2 * p2 + 2 * p3 + p4)
+        Ne[i + 1] = Ne[i] + 1 / 6 * (h1 + 2 * h2 + 2 * h3 + h4)
+        Ui[i + 1] = Ui[i] + 1 / 6 * (m1 + 2 * m2 + 2 * m3 + m4)
+        Ue[i + 1] = Ue[i] + 1 / 6 * (f1 + 2 * f2 + 2 * f3 + f4)
+
+        i = i + 1
+
+    """
     plt.plot(pcheck1, 'b')
     plt.ylabel('p chisl')
     # plt.ylabel('Ni')
@@ -169,8 +256,8 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 
 def main():
     # initialisation of parameters
-    boxsize = 1E-2  # m
-    dx = 1E-5
+    boxsize = 5E-3  # m
+    dx = 1E-6
     Nx = int(boxsize / dx)
     Nsh = 0
 
@@ -190,7 +277,7 @@ def main():
     nui = 0
     # nue = 4e12
     nue = 0
-    nuiz = 2e6  # adjusted value
+    nuiz = 5e5  # adjusted value
     # nuiz = 0
 
     kTi = Ti * 1.6E-19  # J
@@ -223,8 +310,8 @@ def main():
         #ne[i] = n0 * m.exp(e * V[i] / kTe)
         #ui[i] = Ui[i] * m.sqrt(gammai * kTi / mi)
         #ue[i] = Ue[i] * m.sqrt(gammae * kTe / me)
-        ui[i] = Ui[i] * m.sqrt(2/(gammai-1)*kTi / mi)
-        ue[i] = Ue[i] * m.sqrt(2/(gammae-1)*kTe / me)
+        ui[i] = Ui[i] * m.sqrt(gammai*kTi / mi)
+        ue[i] = Ue[i] * m.sqrt(gammae*kTe / me)
         ji[i] = ni[i] * ui[i]
         je[i] = ne[i] * ue[i]
         # ui[i] = n0 * m.sqrt(kTi / mi) / ni[i]
