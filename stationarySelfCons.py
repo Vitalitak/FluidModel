@@ -76,11 +76,11 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     # Ni[0] = m.exp(Psi[0])
     # Ne[0] = m.exp(Psi[0])
     V[0] = -Ti  # adjusted value
-    E[0] = 1000  # adjusted value
+    E[0] = 10  # adjusted value
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001
-    Ui[0] = 1.7  # # adjusted value
+    Ui[0] = 1.2  # # adjusted value
     #Ue[0] = 0.00076
     Ue[0] = Ui[0]*m.sqrt(Ti/Te*me/mi)
 
@@ -169,7 +169,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 
 def main():
     # initialisation of parameters
-    boxsize = 2E-3  # m
+    boxsize = 1E-2  # m
     dx = 1E-5
     Nx = int(boxsize / dx)
     Nsh = 0
@@ -184,13 +184,13 @@ def main():
     Ti = 0.05  # eV
     n0 = 3E17  # m-3
     Vdc = -17
-    gammai = 1
-    gammae = 1
+    gammai = 3
+    gammae = 3
     # nu = 4e8
     nui = 0
     # nue = 4e12
     nue = 0
-    nuiz = 5e6  # adjusted value
+    nuiz = 2e6  # adjusted value
     # nuiz = 0
 
     kTi = Ti * 1.6E-19  # J
@@ -221,8 +221,10 @@ def main():
         ni[i] = Ni[i] * n0
         ne[i] = Ne[i]*n0
         #ne[i] = n0 * m.exp(e * V[i] / kTe)
-        ui[i] = Ui[i] * m.sqrt(gammai * kTi / mi)
-        ue[i] = Ue[i] * m.sqrt(gammae * kTe / me)
+        #ui[i] = Ui[i] * m.sqrt(gammai * kTi / mi)
+        #ue[i] = Ue[i] * m.sqrt(gammae * kTe / me)
+        ui[i] = Ui[i] * m.sqrt(2/(gammai-1)*kTi / mi)
+        ue[i] = Ue[i] * m.sqrt(2/(gammae-1)*kTe / me)
         ji[i] = ni[i] * ui[i]
         je[i] = ne[i] * ue[i]
         # ui[i] = n0 * m.sqrt(kTi / mi) / ni[i]
