@@ -128,7 +128,7 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     dx = 1E-6
     e = 1.6E-19
     mi = 6.68E-26  # kg
-    gamma = 5/3
+    gamma = 1.1
     n0 *= m.exp(V[0])
     # u = [0 for k in range(0, Nx)]
     u = np.zeros(Nx)
@@ -232,7 +232,7 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     dx = 1E-6
     e = 1.6E-19
     me = 9.11E-31  # kg
-    gamma = 5/3
+    gamma = 1.1
     #n0 = 3e17
     n0 = 3e17*m.exp(V[0])
     # u = [0 for k in range(0, Nx)]
@@ -289,7 +289,7 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     """
     u[0] = uprev[0] + dt * (e / me * (V[1] - V[0]) / dx
                             - kTe * gamma / me * (N[0] ** (gamma-2)) * (N[1] - N[0]) / dx
-                            - uprev[0] * (uprev[1] - uprev[0]) / dx)
+                            - uprev[0] * (-uprev[2] + 4*uprev[1] - 3*uprev[0]) / 2 / dx)
 
     """
     u[0] = uprev[0] + dt * (e / me * (-3*V[0]+4*V[1] - V[2]) / 2 / dx
@@ -332,8 +332,8 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                         -uprev[Nel - 1] * (3*uprev[Nel-1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
     """
 
-    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel - 1] - 4*V[Nel - 2] + V[Nel-3]) / 2 / dx
-                                        - kTe * gamma / me *(N[Nel-1] ** (gamma-2)) * (3*N[Nel - 1] - 4*N[Nel - 2] + N[Nel-3]) / 2 / dx
+    u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (V[Nel - 1] - V[Nel - 2]) / dx
+                                        - kTe * gamma / me *(N[Nel-1] ** (gamma-2)) * (N[Nel - 1] - N[Nel - 2]) / dx
                                         - uprev[Nel - 1] * (3*uprev[Nel - 1] - 4*uprev[Nel - 2]+uprev[Nel-3]) / 2 / dx)
     """
     u[Nel - 1] = uprev[Nel - 1] + dt * (e / me * (3*V[Nel - 1] - 4*V[Nel - 2]+V[Nel-3])/ 2 / dx
@@ -470,9 +470,11 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
                                                 u[1:Nel-1]*(nprev[2:Nel]-nprev[0:Nel - 2])/2/dx
                                                 - nuiz * nprev[1:Nel-1])
     """
+
     n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[2:Nel] - u[0:Nel - 2]) / 2 / dx +
                                             u[1:Nel - 1] * (nprev[1:Nel-1] - nprev[0:Nel - 2]) / dx
                                             - nuiz * nprev[1:Nel - 1])
+
     #print(nprev[50] * (u[51] - u[49]) / 2 / dx + u[50] * (nprev[50] - nprev[49]) / dx - nuiz * nprev[50])
 
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
@@ -510,7 +512,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.005
+    Nper = 0.008
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -522,7 +524,7 @@ def main():
     Te = 2.68  # eV
     Ti = 0.05  # eV
     n0 = 3E17  # m-3
-    Vdc = -5.2
+    Vdc = -12
     C0 = 3e-6  # F
     S = 1e-2  # m^2 electrode area
     C = C0 / S
