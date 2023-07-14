@@ -70,6 +70,8 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     pcheck2 = np.zeros(Nx)
     lcheck1 = np.zeros(Nx)
     lcheck2 = np.zeros(Nx)
+    fcheck1 = np.zeros(Nx)
+    fcheck2 = np.zeros(Nx)
 
     # Psi[0] = -0.5
     # Delta[0] = 50000
@@ -80,7 +82,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001
-    Ui[0] = 1.5  # # adjusted value
+    Ui[0] = 1.05  # # adjusted value
     #Ue[0] = 0.00076
     Ue[0] = Ui[0]*m.sqrt(Ti/Te*me/mi)
 
@@ -227,6 +229,9 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
         # pcheck2[i] = gammai * m.pow(Ni[i], gammai+1) - 1
         # lcheck1[i] = Ni[i]
         # lcheck2[i] = m.exp(Psi[i])
+        fcheck1[i] = 1 / (Ue[i] * Ue[i] - (Ne[i] ** (gammae-1)))
+        fcheck2[i] = -re * Ue[i] * E[i] / Ueth - (Ne[i] ** (gammae-1)) * nuiz
+
         # print(p1)
         # print(B * quad(FN, Psi0, Psi[i]+ dx * f3)[0])
         V[i + 1] = V[i] + 1 / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
@@ -238,17 +243,22 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 
         i = i + 1
 
-    """
-    plt.plot(pcheck1, 'b')
-    plt.ylabel('p chisl')
+    plt.plot(Ue, 'b')
+    plt.plot(Ne, 'r')
+    #plt.ylabel('f znam')
     # plt.ylabel('Ni')
     plt.show()
 
-    plt.plot(pcheck2, 'r')
-    plt.ylabel('p znam')
+    plt.plot(fcheck1, 'b')
+    plt.ylabel('f znam')
+    # plt.ylabel('Ni')
+    plt.show()
+
+    plt.plot(fcheck2, 'r')
+    plt.ylabel('f chisl')
     # plt.ylabel('expPsi')
     plt.show()
-    """
+
     Nel = i + 1
 
     return V, E, Ni, Ne, Ui, Ue, Nel
@@ -270,14 +280,14 @@ def main():
     Te = 2.68  # eV
     Ti = 0.05  # eV
     n0 = 3E17  # m-3
-    Vdc = -17
-    gammai = 3
-    gammae = 3
+    Vdc = -5.2
+    gammai = 5/3
+    gammae = 5/3
     # nu = 4e8
     nui = 0
     # nue = 4e12
     nue = 0
-    nuiz = 5e5  # adjusted value
+    nuiz = 4e5  # adjusted value
     # nuiz = 0
 
     kTi = Ti * 1.6E-19  # J
@@ -339,8 +349,8 @@ def main():
     plt.ylabel('Ni')
     plt.show()
     """
-    plt.plot(x, Delta)
-    plt.ylabel('-dPsi/dx')
+    plt.plot(x, E)
+    plt.ylabel('E')
     plt.show()
 
     plt.plot(x, V)

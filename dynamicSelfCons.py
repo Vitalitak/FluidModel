@@ -125,10 +125,10 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     Explicit conservative upwind scheme
     """
     # dt = 1E-11  # s
-    dx = 1E-5
+    dx = 1E-6
     e = 1.6E-19
     mi = 6.68E-26  # kg
-    gamma = 3
+    gamma = 5/3
     n0 *= m.exp(V[0])
     # u = [0 for k in range(0, Nx)]
     u = np.zeros(Nx)
@@ -229,10 +229,10 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     Explicit conservative upwind scheme
     """
     # dt = 1E-11  # s
-    dx = 1E-5
+    dx = 1E-6
     e = 1.6E-19
     me = 9.11E-31  # kg
-    gamma = 3
+    gamma = 5/3
     #n0 = 3e17
     n0 = 3e17*m.exp(V[0])
     # u = [0 for k in range(0, Nx)]
@@ -348,7 +348,7 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                         - uprev[Nel - 1] * (uprev[Nel - 1] - uprev[Nel - 2]) / dx)
     """
 
-    print(- kTe / me *(N[Nel-1] ** (gamma-2)) * (N[Nel - 1] - N[Nel - 2]) / dx)
+    #print(- kTe / me *(N[Nel-1] ** (gamma-2)) * (N[Nel - 1] - N[Nel - 2]) / dx)
     #u[Nel - 1] = uprev[Nel - 1]
 
 
@@ -362,7 +362,7 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
 
     # dt = 1E-11  # s
     e = 1.6E-19
-    dx = 1E-5
+    dx = 1E-6
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
 
@@ -442,7 +442,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     Continuity equation for electrons
     """
 
-    dx = 1E-5
+    dx = 1E-6
     e = 1.6E-19
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
@@ -503,14 +503,14 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
 
 def main():
     # initialisation of parameters
-    boxsize = 2E-2  # m
+    boxsize = 5E-3  # m
     # a = 1E-6
     dt = 1E-13  # s
-    dx = 1E-5
+    dx = 1E-6
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.0001
+    Nper = 0.005
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -522,12 +522,12 @@ def main():
     Te = 2.68  # eV
     Ti = 0.05  # eV
     n0 = 3E17  # m-3
-    Vdc = -17
+    Vdc = -5.2
     C0 = 3e-6  # F
     S = 1e-2  # m^2 electrode area
     C = C0 / S
-    gamma = 1
-    nuiz = 0.7e6
+    gamma = 5/3
+    nuiz = 4e5
     Arf = 0
     w = 13560000  # Hz
 
