@@ -78,7 +78,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
     # Ni[0] = m.exp(Psi[0])
     # Ne[0] = m.exp(Psi[0])
     V[0] = -Ti  # adjusted value
-    E[0] = 50  # adjusted value
+    E[0] = 60  # adjusted value
     Ni[0] = m.exp(V[0])
     Ne[0] = m.exp(V[0])
     # Ui[0] = 1.001

@@ -475,6 +475,11 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
                                             u[1:Nel - 1] * (nprev[1:Nel-1] - nprev[0:Nel - 2]) / dx
                                             - nuiz * nprev[1:Nel - 1])
 
+    """
+    n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[1:Nel-1] - u[0:Nel - 2]) / dx +
+                                            u[1:Nel - 1] * (nprev[2:Nel] - nprev[0:Nel - 2]) / 2 / dx
+                                            - nuiz * nprev[1:Nel - 1])
+    """
     #print(nprev[50] * (u[51] - u[49]) / 2 / dx + u[50] * (nprev[50] - nprev[49]) / dx - nuiz * nprev[50])
 
     # n[Nsh:Nel] = nprev[Nsh:Nel] - dt * ((nprev[Nsh:Nel]*u[Nsh:Nel]-nprev[Nsh-1:Nel - 1]*u[Nsh-1:Nel-1])/dx)
@@ -512,7 +517,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.008
+    Nper = 0.01
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
