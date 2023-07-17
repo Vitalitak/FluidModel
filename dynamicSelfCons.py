@@ -285,20 +285,29 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
 
     #u[0] = uprev[0]
     """
-    #right
+    #right isothermal
     u[0] = uprev[0] + dt * (e / me * (V[1] - V[0]) / dx
                                         - kTe / me / n[0] * (n[1] - n[0]) / dx
                                         - uprev[0] * (uprev[1] - uprev[0]) / dx)
     """
+
+    # right adiabatic
     u[0] = uprev[0] + dt * (e / me * (V[1] - V[0]) / dx
                             - kTe * gamma / me * (N[0] ** (gamma-2)) * (N[1] - N[0]) / dx
                             - uprev[0] * (-uprev[2] + 4*uprev[1] - 3*uprev[0]) / 2 / dx)
 
     """
+    u[0] = uprev[0] + dt * (e / me * (- V[2] + 4*V[1] - 3*V[0]) / 2 / dx
+                            - kTe * gamma / me * (N[0] ** (gamma - 2)) * (-N[2] + 4*N[1] - 3* N[0]) / 2 / dx
+                            - uprev[0] * (-uprev[2] + 4 * uprev[1] - 3 * uprev[0]) / 2 / dx)
+    """
+    """
     u[0] = uprev[0] + dt * (e / me * (-3*V[0]+4*V[1] - V[2]) / 2 / dx
                             - kTe / me / n[0] * (-3*n[0]+4*n[1] - n[2]) / 2 / dx
                             - uprev[0] * (-3*uprev[0]+4*uprev[1] - uprev[2])/2 / dx)
     """
+
+
     """
     u[Nsh:Nel-1] = uprev[Nsh:Nel-1] + dt * (e / me * (V[Nsh+1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                             - kTe / me * (n[Nsh:Nel-1] ** (gamma - 2)) * (n[Nsh+1:Nel] - n[Nsh - 1:Nel - 2]) / 2 / dx
@@ -311,10 +320,17 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
                                                 - uprev[1:Nel - 1]*(uprev[2:Nel] - uprev[0:Nel - 2]) / 2 / dx)
     """
 
+    # right adiabatic
     u[1:Nel - 1] = uprev[1:Nel - 1] + dt * (e / me * (V[2:Nel] - V[0:Nel - 2]) / 2 / dx
                                             - kTe *gamma / me * (N[1:Nel - 1] ** (gamma-2)) * (N[2:Nel] - N[0:Nel - 2]) / 2 / dx
                                             - uprev[1:Nel - 1] * (uprev[2:Nel] - uprev[0:Nel - 2]) / 2 / dx)
 
+    """
+    u[1:Nel - 1] = uprev[1:Nel - 1] + dt * (e / me * (V[2:Nel] - V[0:Nel - 2]) / 2 / dx
+                                            - kTe * gamma / me * (N[1:Nel - 1] ** (gamma - 2)) * (
+                                                        N[2:Nel] - N[0:Nel - 2]) / 2 / dx
+                                            - uprev[1:Nel - 1] * (uprev[1:Nel-1] - uprev[0:Nel - 2]) / dx)
+    """
     """
     u[Nsh:Nel - 1] = uprev[Nsh:Nel - 1] + dt * (e / me * (V[Nsh + 1:Nel] - V[Nsh - 1:Nel - 2]) / 2 / dx
                                                 - kTe / me / n[Nsh:Nel - 1] * (
@@ -515,12 +531,12 @@ def main():
     # initialisation of parameters
     boxsize = 5E-3  # m
     # a = 1E-6
-    dt = 1E-13  # s
+    dt = 2E-14  # s
     dx = 1E-6
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.011
+    Nper = 0.05
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
