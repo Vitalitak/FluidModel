@@ -1,6 +1,7 @@
 import math as m
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import signal
 
 
 """
@@ -129,7 +130,8 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     e = 1.6E-19
     mi = 6.68E-26  # kg
     gamma = 1.1
-    n0 *= m.exp(V[0])
+    #n0 *= m.exp(V[0])
+    n0 = n[0]
     # u = [0 for k in range(0, Nx)]
     u = np.zeros(Nx)
 
@@ -234,7 +236,8 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     me = 9.11E-31  # kg
     gamma = 1.1
     #n0 = 3e17
-    n0 = 3e17*m.exp(V[0])
+    #n0 = 3e17*m.exp(V[0])
+    n0 = n[0]
     # u = [0 for k in range(0, Nx)]
     u = np.zeros(Nx)
 
@@ -461,7 +464,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     """
     """
     n[1:Nel - 1] = nprev[1:Nel - 1] - dt * (nprev[1:Nel - 1] * (u[1:Nel-1] - u[0:Nel - 2]) / dx +
-                                            u[1:Nel - 1] * (nprev[2:Nel] - nprev[0:Nel - 2]) / 2 / dx
+                                            u[1:Nel - 1] * (nprev[1:Nel-1] - nprev[0:Nel - 2]) / dx
                                             - nuiz * nprev[1:Nel - 1])
     """
     """
@@ -600,6 +603,47 @@ def main():
     f5.close()
     i = 0
 
+    """
+    with open("V_sm.txt", "r") as f1:
+        for line in f1.readlines():
+            for ind in line.split():
+                V[i] = float(ind)
+                i += 1
+    f1.close()
+    i = 0
+    with open("ni_sm.txt", "r") as f2:
+        for line in f2.readlines():
+            for ind in line.split():
+                ni[i] = float(ind)
+                i += 1
+    f2.close()
+    i = 0
+
+    with open("ne_sm.txt", "r") as f3:
+        for line in f3.readlines():
+            for ind in line.split():
+                ne[i] = float(ind)
+                i += 1
+    f3.close()
+    i = 0
+
+    with open("ui_sm.txt", "r") as f4:
+        for line in f4.readlines():
+            for ind in line.split():
+                ui[i] = float(ind)
+                i += 1
+    f4.close()
+    i = 0
+
+    with open("ue_sm.txt", "r") as f5:
+        for line in f5.readlines():
+            for ind in line.split():
+                ue[i] = float(ind)
+                i += 1
+    f5.close()
+    i = 0
+    """
+
     with open("Nel.txt", "r") as f6:
         for line in f6.readlines():
             Nel = int(line)
@@ -610,6 +654,8 @@ def main():
     for i in range(0, Nx):
         ue[i] = m.sqrt(kTe / me) * m.sqrt(3+2*e*V[i]/kTe+2*(de+1)/de*(1-m.exp(de*e*V[i]/kTe)))
     """
+
+    #Nel -= 8
 
     x = np.array(x)
     V = np.array(V)
@@ -643,6 +689,15 @@ def main():
     Pav = np.zeros(int(Nper))
     time = np.arange(2 * Nt + 1) * dt
 
+    """
+    VdcRF = np.zeros(int(2 * Nt + 1)+3000)
+    Iel = np.zeros(int(2 * Nt + 1)+3000)
+    Ii = np.zeros(int(2 * Nt + 1)+3000)
+    VRF = np.zeros(int(2 * Nt + 1)+3000)
+    P = np.zeros(int(2 * Nt + 1)+3000)
+    Pav = np.zeros(int(Nper))
+    time = np.arange(2 * Nt + 3001) * dt
+    """
 
 
     q = 0
@@ -748,6 +803,79 @@ def main():
         Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
         # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
 
+    """
+    # smoothing
+    V_sm = np.zeros(Nx)
+    ne_sm = np.zeros(Nx)
+    ni_sm = np.zeros(Nx)
+    ue_sm = np.zeros(Nx)
+    ui_sm = np.zeros(Nx)
+    Nsm = 10
+
+    Vpre = np.zeros(Nel)
+    ne_pre = np.zeros(Nel)
+    ni_pre = np.zeros(Nel)
+    ue_pre = np.zeros(Nel)
+    ui_pre = np.zeros(Nel)
+    Vpre[0:Nel] = V_1[0:Nel]
+    ne_pre[0:Nel] = ne_1[0:Nel]
+    ni_pre[0:Nel] = ni_1[0:Nel]
+    ue_pre[0:Nel] = ue_1[0:Nel]
+    ui_pre[0:Nel] = ui_1[0:Nel]
+
+    V_sm[0:Nel] = signal.savgol_filter(Vpre, window_length=Nsm, polyorder=2)
+    ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=Nsm, polyorder=2)
+    ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=Nsm, polyorder=2)
+    ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=Nsm, polyorder=2)
+    ui_sm[0:Nel] = signal.savgol_filter(ui_pre, window_length=Nsm, polyorder=2)
+    
+
+    V_1 = V_sm
+    ne_1 = ne_sm
+    ni_1 = ni_sm
+    ue_1 = ue_sm
+    ui_1 = ui_sm
+
+
+    # next calculation
+
+    for i in range(Nt, Nt+1500):
+        # print(i)
+        t += dt
+
+        Vel2 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
+
+        V_2 = Pois(ne_1, ni_1, V_1, Vel2, n0, dx, Nel, Nsh, Nx)
+        ui_2 = momentum(V_1, ni_1, ui_1, kTi, kTe, n0, Nel, Nsh, Nx, dt)
+        ue_2 = momentum_e(V_1, ne_1, ue_1, kTe, Nel, Nsh, Nx, dt)
+        ni_2 = continuity(ui_1, ni_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
+        ne_2 = concentration_e(ue_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
+
+        q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])*dt / C
+
+        VdcRF[int(2 * i - 1)] = q
+        Iel[int(2 * i - 1)] = e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])
+        Ii[int(2 * i - 1)] = e * ni_2[Nel - 1] * ui_2[Nel - 1]
+        VRF[int(2 * i - 1)] = - Arf * m.sin(w * 2 * m.pi * t)
+
+
+        t += dt
+        Vel3 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
+
+        V_1 = Pois(ne_2, ni_2, V_2, Vel3, n0, dx, Nel, Nsh, Nx)
+        ui_1 = momentum(V_2, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
+        ue_1 = momentum_e(V_2, ne_2, ue_2, kTe, Nel, Nsh, Nx, dt)
+        ni_1 = continuity(ui_2, ni_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
+        ne_1 = concentration_e(ue_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
+
+        q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C
+
+        VdcRF[int(2 * i)] = q
+        VRF[int(2 * i)] = - Arf * m.sin(w * 2 * m.pi * t)
+        Iel[int(2 * i)] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
+        Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
+
+    """
     for i in range(0, int(2 * Nt + 1)):
         P[i] = Iel[i] * S * VdcRF[i]
     """
