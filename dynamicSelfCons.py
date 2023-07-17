@@ -520,7 +520,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.01
+    Nper = 0.011
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
