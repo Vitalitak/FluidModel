@@ -267,7 +267,7 @@ def RungeKuttasystem(Nx, dx, n0, Te, Ti, Vl, gammai, gammae, nui, nue, nuiz):
 def main():
     # initialisation of parameters
     boxsize = 5E-3  # m
-    dx = 1E-6
+    dx = 4E-6
     Nx = int(boxsize / dx)
     Nsh = 0
 
