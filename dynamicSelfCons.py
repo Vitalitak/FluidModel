@@ -126,7 +126,7 @@ def momentum(V, n, uprev, kTi, kTe, n0, Nel, Nsh, Nx, dt):
     Explicit conservative upwind scheme
     """
     # dt = 1E-11  # s
-    dx = 4E-6
+    dx = 1E-5
     e = 1.6E-19
     mi = 6.68E-26  # kg
     gamma = 1.1
@@ -231,7 +231,7 @@ def momentum_e(V, n, uprev, kTe, Nel, Nsh, Nx, dt):
     Explicit conservative upwind scheme
     """
     # dt = 1E-11  # s
-    dx = 4E-6
+    dx = 1E-5
     e = 1.6E-19
     me = 9.11E-31  # kg
     gamma = 1.1
@@ -381,7 +381,7 @@ def continuity(u, nprev, ne, nuiz, Nel, Nsh, Nx, dt):
 
     # dt = 1E-11  # s
     e = 1.6E-19
-    dx = 4E-6
+    dx = 1E-5
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
 
@@ -461,7 +461,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     Continuity equation for electrons
     """
 
-    dx = 4E-6
+    dx = 1E-5
     e = 1.6E-19
     # n = [0 for k in range(0, Nx)]
     n = np.zeros(Nx)
@@ -532,11 +532,11 @@ def main():
     boxsize = 5E-3  # m
     # a = 1E-6
     dt = 2E-14  # s
-    dx = 4E-6
+    dx = 1E-5
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.07
+    Nper = 0.15
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -554,7 +554,7 @@ def main():
     C = C0 / S
     gamma = 5/3
     nuiz = 4e5
-    Arf = 0
+    Arf = -20
     w = 13560000  # Hz
 
     #Nt = 15000
