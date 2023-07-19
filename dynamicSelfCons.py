@@ -536,7 +536,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.2
+    Nper = 0.25
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -696,7 +696,7 @@ def main():
     Pav = [0 for k in range(0, Nper)]
     time = [dt * k for k in range(0, int(2*Nt+1))]
     """
-
+    """
     VdcRF = np.zeros(int(2 * Nt + 1))
     Iel = np.zeros(int(2 * Nt + 1))
     Ii = np.zeros(int(2 * Nt + 1))
@@ -704,16 +704,16 @@ def main():
     P = np.zeros(int(2 * Nt + 1))
     Pav = np.zeros(int(Nper))
     time = np.arange(2 * Nt + 1) * dt
+    """
 
-    """
-    VdcRF = np.zeros(int(2 * Nt + 1)+3000)
-    Iel = np.zeros(int(2 * Nt + 1)+3000)
-    Ii = np.zeros(int(2 * Nt + 1)+3000)
-    VRF = np.zeros(int(2 * Nt + 1)+3000)
-    P = np.zeros(int(2 * Nt + 1)+3000)
+    VdcRF = np.zeros(int(Nt + 1))
+    Iel = np.zeros(int(Nt + 1))
+    Ii = np.zeros(int(Nt + 1))
+    VRF = np.zeros(int(Nt + 1))
+    P = np.zeros(int(Nt + 1))
     Pav = np.zeros(int(Nper))
-    time = np.arange(2 * Nt + 3001) * dt
-    """
+    time = np.arange(Nt + 1) * 2 * dt
+
 
 
     q = 0
@@ -773,12 +773,15 @@ def main():
             q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3 * kTe / me) / 4) * dt / C
         """
 
+        """
         VdcRF[int(2 * i - 1)] = q
         Iel[int(2 * i - 1)] = e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])
         Ii[int(2 * i - 1)] = e * ni_2[Nel - 1] * ui_2[Nel - 1]
         VRF[int(2 * i - 1)] = - Arf * m.sin(w * 2 * m.pi * t)
         # print(e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3*kTe / me) / 4 * m.exp(
         # e * (V_2[Nel - 1] - V_2[0]) / kTe)) * dt / C)
+        """
+
 
         t += dt
         Vel3 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
@@ -812,11 +815,18 @@ def main():
         else:
             q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[0] * m.sqrt(3 * kTe / me) / 4) * dt / C
         """
-
+        """
         VdcRF[int(2 * i)] = q
         VRF[int(2 * i)] = - Arf * m.sin(w * 2 * m.pi * t)
         Iel[int(2 * i)] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
         Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
+        # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
+        """
+
+        VdcRF[i] = q
+        VRF[i] = - Arf * m.sin(w * 2 * m.pi * t)
+        Iel[i] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
+        Ii[i] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
         # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
 
     """
@@ -892,7 +902,8 @@ def main():
         Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
 
     """
-    for i in range(0, int(2 * Nt + 1)):
+    #for i in range(0, int(2 * Nt + 1)):
+    for i in range(0, int(Nt + 1)):
         P[i] = Iel[i] * S * VdcRF[i]
     """
     for j in range(0, Nper-1):
