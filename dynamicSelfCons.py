@@ -470,7 +470,7 @@ def concentration_e(u, nprev, nuiz, Nel, Nsh, Nx, dt):
     n[0] = nprev[0]
     """
     n[0] = nprev[0] - dt * (nprev[0] * (-3*u[0] + 4*u[1]-u[2]) / 2 / dx +
-                                        u[0] * (-3*nprev[0] + 4*nprev[1]-nprev[2]) / 2 / dx
+                                        u[0] * (-nprev[0] + nprev[1]) / dx
                                         - nuiz * nprev[0])
     """
     """
