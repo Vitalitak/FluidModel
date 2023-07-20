@@ -280,9 +280,9 @@ def main():
     Te = 2.68  # eV
     Ti = 0.05  # eV
     n0 = 3E17  # m-3
-    Vdc = -12
-    gammai = 1.1
-    gammae = 1.1
+    Vdc = -14
+    gammai = 1
+    gammae = 1
     # nu = 4e8
     nui = 0
     # nue = 4e12
