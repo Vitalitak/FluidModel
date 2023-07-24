@@ -561,7 +561,7 @@ def main():
     Nx = int(boxsize / dx)
     Nsh = 1
     # Nt = 200000
-    Nper = 0.75
+    Nper = 0.5
     tEnd = 50  # ns
 
     me = 9.11E-31  # kg
@@ -579,11 +579,13 @@ def main():
     C = C0 / S
     gamma = 5/3
     nuiz = 4e5
-    Arf = 20
+    Arf = 16
     w = 13560000  # Hz
 
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
+    Nsm = 8
+    Numper = 3
 
     print(Nt)
     print(int((Nper - 2) / w / dt))
@@ -690,13 +692,7 @@ def main():
             Nel = int(line)
     f6.close()
 
-    """
-    # initial conditions for ue
-    for i in range(0, Nx):
-        ue[i] = m.sqrt(kTe / me) * m.sqrt(3+2*e*V[i]/kTe+2*(de+1)/de*(1-m.exp(de*e*V[i]/kTe)))
-    """
 
-    #Nel -= 8
 
     x = np.array(x)
     V = np.array(V)
@@ -721,16 +717,16 @@ def main():
     Pav = [0 for k in range(0, Nper)]
     time = [dt * k for k in range(0, int(2*Nt+1))]
     """
-    """
-    VdcRF = np.zeros(int(2 * Nt + 1))
-    Iel = np.zeros(int(2 * Nt + 1))
-    Ii = np.zeros(int(2 * Nt + 1))
-    VRF = np.zeros(int(2 * Nt + 1))
-    P = np.zeros(int(2 * Nt + 1))
-    Pav = np.zeros(int(Nper))
-    time = np.arange(2 * Nt + 1) * dt
-    """
 
+    VdcRF = np.zeros(int(Numper * Nt + 1))
+    Iel = np.zeros(int(Numper * Nt + 1))
+    Ii = np.zeros(int(Numper * Nt + 1))
+    VRF = np.zeros(int(Numper * Nt + 1))
+    P = np.zeros(int(Numper * Nt + 1))
+    Pav = np.zeros(int(Nper))
+    time = np.arange(Numper * Nt + 1) * 2 * dt
+
+    """
     VdcRF = np.zeros(int(Nt + 1))
     Iel = np.zeros(int(Nt + 1))
     Ii = np.zeros(int(Nt + 1))
@@ -738,7 +734,7 @@ def main():
     P = np.zeros(int(Nt + 1))
     Pav = np.zeros(int(Nper))
     time = np.arange(Nt + 1) * 2 * dt
-
+    """
 
 
     q = 0
@@ -752,183 +748,151 @@ def main():
     ne_1 = concentration_e(ue, ne, nuiz, Nel, Nsh, Nx, dt)
 
 
-    """
-    if V_1[Nel - 1] < 0:
-        q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[0] * m.sqrt(3 * kTe / me) / 4 * m.exp(
-            e * (V_1[Nel - 1] - V_1[0]) / kTe)) * dt / C
-    else:
-        q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[0] * m.sqrt(3 * kTe / me) / 4) * dt / C
-    """
-
     q += e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1]) * dt / C
     VdcRF[0] = q
     Iel[0] = e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1])
     Ii[0] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
     VRF[0] = 0
-    # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[0]*m.sqrt(kTe/me)/4*m.exp(e*(V_1[Nel - 1]-V_1[0])/kTe)) * dt / C)
 
     t = 0
 
     #ue_2 = momentum_e(V, ne, ue, kTe, Nel, Nsh, Nx, dt)
 
-    for i in range(1, Nt):
+    for j in range(1, Numper+1):
+        for i in range(int((j-1)*Nt), int(j*Nt)):
+            # print(i)
+            t += dt
+
+            Vel2 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
+            # Vel2 = V[Nel-1] + q - Arf * m.sin(1e-3 * 2 * m.pi * (2 * i - 1))
+
+            V_2 = Pois(ne_1, ni_1, V_1, Vel2, n0, dx, Nel, Nsh, Nx)
+            # ui_2 = momentum(V_2, ni_1, ui_1, kTi, kTe, n0, Nel, Nsh, Nx, dt)
+            ui_2 = momentum(V_1, ni_1, ui_1, kTi, kTe, n0, Nel, Nsh, Nx, dt)
+            ue_2 = momentum_e(V_1, ne_1, ue_1, kTe, Nel, Nsh, Nx, dt)
+            #ue_2 = momentum_e(V_2, ne_1, ue_2, kTe, Nel, Nsh, Nx, dt)
+            # ni_2 = continuity(ui_2, ni_1, V_2, n0, kTe, nuiz, Nel, Nsh, Nx, dt)
+            ni_2 = continuity(ui_1, ni_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
+            ne_2 = concentration_e(ue_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
+
+            q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])*dt / C
+
+            """
+            VdcRF[int(2 * i - 1)] = q
+            Iel[int(2 * i - 1)] = e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])
+            Ii[int(2 * i - 1)] = e * ni_2[Nel - 1] * ui_2[Nel - 1]
+            VRF[int(2 * i - 1)] = - Arf * m.sin(w * 2 * m.pi * t)
+            # print(e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3*kTe / me) / 4 * m.exp(
+            # e * (V_2[Nel - 1] - V_2[0]) / kTe)) * dt / C)
+            """
+
+
+            t += dt
+            Vel3 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
+            # Vel3 = V[Nel-1] + q - Arf * m.sin(1e-3 * 2 * m.pi * (2 * i))
+            # Vel3 = V[Nel - 1] + q
+
+            V_1 = Pois(ne_2, ni_2, V_2, Vel3, n0, dx, Nel, Nsh, Nx)
+            # ui_1 = momentum(V_1, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
+            ui_1 = momentum(V_2, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
+            ue_1 = momentum_e(V_2, ne_2, ue_2, kTe, Nel, Nsh, Nx, dt)
+            #ue_1 = momentum_e(V_1, ne_2, ue_1, kTe, Nel, Nsh, Nx, dt)
+            # ni_1 = continuity(ui_1, ni_2, V_1, n0, kTe, nuiz, Nel, Nsh, Nx, dt)
+            ni_1 = continuity(ui_2, ni_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
+            ne_1 = concentration_e(ue_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
+            # ne_1 = continuity(ue_1, ne_2, Nel, Nx, dt)
+
+            q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C
+
+            """
+            VdcRF[int(2 * i)] = q
+            VRF[int(2 * i)] = - Arf * m.sin(w * 2 * m.pi * t)
+            Iel[int(2 * i)] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
+            Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
+            # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
+            """
+
+            VdcRF[i] = q
+            VRF[i] = - Arf * m.sin(w * 2 * m.pi * t)
+            Iel[i] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
+            Ii[i] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
+            # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
+
+        """
+        # smoothing
+        V_sm = np.zeros(Nx)
+        ne_sm = np.zeros(Nx)
+        ni_sm = np.zeros(Nx)
+        ue_sm = np.zeros(Nx)
+        ui_sm = np.zeros(Nx)
+        Nsm = 10
+    
+        Vpre = np.zeros(Nel)
+        ne_pre = np.zeros(Nel)
+        ni_pre = np.zeros(Nel)
+        ue_pre = np.zeros(Nel)
+        ui_pre = np.zeros(Nel)
+        Vpre[0:Nel] = V_1[0:Nel]
+        ne_pre[0:Nel] = ne_1[0:Nel]
+        ni_pre[0:Nel] = ni_1[0:Nel]
+        ue_pre[0:Nel] = ue_1[0:Nel]
+        ui_pre[0:Nel] = ui_1[0:Nel]
+    
+        V_sm[0:Nel] = signal.savgol_filter(Vpre, window_length=Nsm, polyorder=2)
+        ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=Nsm, polyorder=2)
+        ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=Nsm, polyorder=2)
+        ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=Nsm, polyorder=2)
+        ui_sm[0:Nel] = signal.savgol_filter(ui_pre, window_length=Nsm, polyorder=2)
+        
+    
+        V_1 = V_sm
+        ne_1 = ne_sm
+        ni_1 = ni_sm
+        ue_1 = ue_sm
+        ui_1 = ui_sm
+        """
+        ue_sm = np.zeros(Nx)
+        ue_pre = np.zeros(Nel)
+        ue_pre[0:Nel] = ue_1[0:Nel]
+        ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=Nsm, polyorder=3)
+        ue_1 = ue_sm
+
+    """
+    # next calculation
+
+    for i in range(Nt, int(2*Nt)):
         # print(i)
         t += dt
 
         Vel2 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
-        # Vel2 = V[Nel-1] + q - Arf * m.sin(1e-3 * 2 * m.pi * (2 * i - 1))
-        # Vel2 = V[Nel-1] + q
 
         V_2 = Pois(ne_1, ni_1, V_1, Vel2, n0, dx, Nel, Nsh, Nx)
-        # ui_2 = momentum(V_2, ni_1, ui_1, kTi, kTe, n0, Nel, Nsh, Nx, dt)
         ui_2 = momentum(V_1, ni_1, ui_1, kTi, kTe, n0, Nel, Nsh, Nx, dt)
         ue_2 = momentum_e(V_1, ne_1, ue_1, kTe, Nel, Nsh, Nx, dt)
-        #ue_2 = momentum_e(V_2, ne_1, ue_2, kTe, Nel, Nsh, Nx, dt)
-        # ni_2 = continuity(ui_2, ni_1, V_2, n0, kTe, nuiz, Nel, Nsh, Nx, dt)
         ni_2 = continuity(ui_1, ni_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
         ne_2 = concentration_e(ue_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
 
         q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])*dt / C
 
-        """
-        if V_2[Nel - 1] < 0:
-            q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3 * kTe / me) / 4 * m.exp(
-                e * (V_2[Nel - 1] - V_2[0]) / kTe)) * dt / C
-        else:
-            q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3 * kTe / me) / 4) * dt / C
-        """
-
-        """
-        VdcRF[int(2 * i - 1)] = q
-        Iel[int(2 * i - 1)] = e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])
-        Ii[int(2 * i - 1)] = e * ni_2[Nel - 1] * ui_2[Nel - 1]
-        VRF[int(2 * i - 1)] = - Arf * m.sin(w * 2 * m.pi * t)
-        # print(e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3*kTe / me) / 4 * m.exp(
-        # e * (V_2[Nel - 1] - V_2[0]) / kTe)) * dt / C)
-        """
-
-
         t += dt
         Vel3 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
-        # Vel3 = V[Nel-1] + q - Arf * m.sin(1e-3 * 2 * m.pi * (2 * i))
-        # Vel3 = V[Nel - 1] + q
 
         V_1 = Pois(ne_2, ni_2, V_2, Vel3, n0, dx, Nel, Nsh, Nx)
-        # ui_1 = momentum(V_1, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
         ui_1 = momentum(V_2, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
         ue_1 = momentum_e(V_2, ne_2, ue_2, kTe, Nel, Nsh, Nx, dt)
-        #ue_1 = momentum_e(V_1, ne_2, ue_1, kTe, Nel, Nsh, Nx, dt)
-        # ni_1 = continuity(ui_1, ni_2, V_1, n0, kTe, nuiz, Nel, Nsh, Nx, dt)
         ni_1 = continuity(ui_2, ni_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
         ne_1 = concentration_e(ue_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
-        # ne_1 = continuity(ue_1, ne_2, Nel, Nx, dt)
-
-        """
-        ne_1 = continuity(ue_2, ne_2, Nel, Nx, dt)
-        ni_1 = continuity(ui_2, ni_2, Nel, Nx, dt)
-        ue_1 = momentum_e(V_2, ne_1, ue_2, kTe, de, n0, Nel, Nx, dt)
-        ui_1 = momentum(V_2, ni_1, ui_2, kTi, kTe, n0, Nel, Nx, dt)
-        V_1 = Pois(ne_1, ni_1, Vel3, dx, Nel, Nx)
-        """
 
         q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C
-
-        """
-        if V_1[Nel - 1] < 0:
-            q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[0] * m.sqrt(3 * kTe / me) / 4 * m.exp(
-                e * (V_1[Nel - 1] - V_1[0]) / kTe)) * dt / C
-        else:
-            q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[0] * m.sqrt(3 * kTe / me) / 4) * dt / C
-        """
-        """
-        VdcRF[int(2 * i)] = q
-        VRF[int(2 * i)] = - Arf * m.sin(w * 2 * m.pi * t)
-        Iel[int(2 * i)] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
-        Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
-        # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
-        """
 
         VdcRF[i] = q
         VRF[i] = - Arf * m.sin(w * 2 * m.pi * t)
         Iel[i] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
         Ii[i] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
-        # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
-
     """
-    # smoothing
-    V_sm = np.zeros(Nx)
-    ne_sm = np.zeros(Nx)
-    ni_sm = np.zeros(Nx)
-    ue_sm = np.zeros(Nx)
-    ui_sm = np.zeros(Nx)
-    Nsm = 10
 
-    Vpre = np.zeros(Nel)
-    ne_pre = np.zeros(Nel)
-    ni_pre = np.zeros(Nel)
-    ue_pre = np.zeros(Nel)
-    ui_pre = np.zeros(Nel)
-    Vpre[0:Nel] = V_1[0:Nel]
-    ne_pre[0:Nel] = ne_1[0:Nel]
-    ni_pre[0:Nel] = ni_1[0:Nel]
-    ue_pre[0:Nel] = ue_1[0:Nel]
-    ui_pre[0:Nel] = ui_1[0:Nel]
-
-    V_sm[0:Nel] = signal.savgol_filter(Vpre, window_length=Nsm, polyorder=2)
-    ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=Nsm, polyorder=2)
-    ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=Nsm, polyorder=2)
-    ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=Nsm, polyorder=2)
-    ui_sm[0:Nel] = signal.savgol_filter(ui_pre, window_length=Nsm, polyorder=2)
-    
-
-    V_1 = V_sm
-    ne_1 = ne_sm
-    ni_1 = ni_sm
-    ue_1 = ue_sm
-    ui_1 = ui_sm
-
-
-    # next calculation
-
-    for i in range(Nt, Nt+1500):
-        # print(i)
-        t += dt
-
-        Vel2 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
-
-        V_2 = Pois(ne_1, ni_1, V_1, Vel2, n0, dx, Nel, Nsh, Nx)
-        ui_2 = momentum(V_1, ni_1, ui_1, kTi, kTe, n0, Nel, Nsh, Nx, dt)
-        ue_2 = momentum_e(V_1, ne_1, ue_1, kTe, Nel, Nsh, Nx, dt)
-        ni_2 = continuity(ui_1, ni_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
-        ne_2 = concentration_e(ue_1, ne_1, nuiz, Nel, Nsh, Nx, dt)
-
-        q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])*dt / C
-
-        VdcRF[int(2 * i - 1)] = q
-        Iel[int(2 * i - 1)] = e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])
-        Ii[int(2 * i - 1)] = e * ni_2[Nel - 1] * ui_2[Nel - 1]
-        VRF[int(2 * i - 1)] = - Arf * m.sin(w * 2 * m.pi * t)
-
-
-        t += dt
-        Vel3 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
-
-        V_1 = Pois(ne_2, ni_2, V_2, Vel3, n0, dx, Nel, Nsh, Nx)
-        ui_1 = momentum(V_2, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
-        ue_1 = momentum_e(V_2, ne_2, ue_2, kTe, Nel, Nsh, Nx, dt)
-        ni_1 = continuity(ui_2, ni_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
-        ne_1 = concentration_e(ue_2, ne_2, nuiz, Nel, Nsh, Nx, dt)
-
-        q += e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C
-
-        VdcRF[int(2 * i)] = q
-        VRF[int(2 * i)] = - Arf * m.sin(w * 2 * m.pi * t)
-        Iel[int(2 * i)] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
-        Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
-
-    """
-    #for i in range(0, int(2 * Nt + 1)):
-    for i in range(0, int(Nt + 1)):
+    for i in range(0, int(Numper * Nt + 1)):
+    #for i in range(0, int(Nt + 1)):
         P[i] = Iel[i] * S * VdcRF[i]
     """
     for j in range(0, Nper-1):
@@ -986,6 +950,7 @@ def main():
     # plt.axis([-1e-9, 5e-7, -13, 12])
     plt.grid(visible='True', which='both', axis='y')
     plt.show()
+
     """
     f = open("VDC.txt", "w")
     for d in VdcRF:
@@ -997,6 +962,29 @@ def main():
         f.write(f"{d}\n")
     f.close()
     """
+    f = open("V_1.txt", "w")
+    for d in V_1:
+        f.write(f"{d}\n")
+    f.close()
+
+    f = open("ne_1.txt", "w")
+    for d in ne_1:
+        f.write(f"{d}\n")
+    f.close()
+    f = open("ni_1.txt", "w")
+    for d in ni_1:
+        f.write(f"{d}\n")
+    f.close()
+    f = open("ue_1.txt", "w")
+    for d in ue_1:
+        f.write(f"{d}\n")
+    f.close()
+    f = open("ui_1.txt", "w")
+    for d in ui_1:
+        f.write(f"{d}\n")
+    f.close()
+
+
     plt.plot(x, ni, 'r--')
     plt.plot(x, ni_1, 'r-')
     plt.plot(x, ne, 'b--')

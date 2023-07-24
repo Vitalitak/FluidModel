@@ -6,7 +6,7 @@ from scipy import signal
 def main():
     # initialisation of parameters
     boxsize = 5E-3  # m
-    dx = 1E-6
+    dx = 1E-5
     Nx = int(boxsize / dx)
     N = 8
 
@@ -20,14 +20,14 @@ def main():
     ue = [0 for k in range(0, Nx)]
 
     i = 0
-    with open("V.txt", "r") as f1:
+    with open("V_1.txt", "r") as f1:
         for line in f1.readlines():
             for ind in line.split():
                 V[i] = float(ind)
                 i += 1
     f1.close()
     i = 0
-    with open("ni.txt", "r") as f2:
+    with open("ni_1.txt", "r") as f2:
         for line in f2.readlines():
             for ind in line.split():
                 ni[i] = float(ind)
@@ -35,7 +35,7 @@ def main():
     f2.close()
     i = 0
 
-    with open("ne.txt", "r") as f3:
+    with open("ne_1.txt", "r") as f3:
         for line in f3.readlines():
             for ind in line.split():
                 ne[i] = float(ind)
@@ -43,7 +43,7 @@ def main():
     f3.close()
     i = 0
 
-    with open("ui.txt", "r") as f4:
+    with open("ui_1.txt", "r") as f4:
         for line in f4.readlines():
             for ind in line.split():
                 ui[i] = float(ind)
@@ -51,7 +51,7 @@ def main():
     f4.close()
     i = 0
 
-    with open("ue.txt", "r") as f5:
+    with open("ue_1.txt", "r") as f5:
         for line in f5.readlines():
             for ind in line.split():
                 ue[i] = float(ind)
@@ -92,22 +92,27 @@ def main():
         ue_sm[i] /= N
         ui_sm[i] /= N
     """
-    Vpre = np.zeros(Nel)
-    ne_pre = np.zeros(Nel)
-    ni_pre = np.zeros(Nel)
+    #Vpre = np.zeros(Nel)
+    #ne_pre = np.zeros(Nel)
+    #ni_pre = np.zeros(Nel)
     ue_pre = np.zeros(Nel)
-    ui_pre = np.zeros(Nel)
-    Vpre[0:Nel] = V[0:Nel]
-    ne_pre[0:Nel] = ne[0:Nel]
-    ni_pre[0:Nel] = ni[0:Nel]
+    #ui_pre = np.zeros(Nel)
+    #Vpre[0:Nel] = V[0:Nel]
+    #ne_pre[0:Nel] = ne[0:Nel]
+    #ni_pre[0:Nel] = ni[0:Nel]
     ue_pre[0:Nel] = ue[0:Nel]
-    ui_pre[0:Nel] = ui[0:Nel]
+    #ui_pre[0:Nel] = ui[0:Nel]
 
-    V_sm[0:Nel] = signal.savgol_filter(Vpre, window_length=10, polyorder=2)
-    ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=10, polyorder=2)
-    ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=10, polyorder=2)
-    ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=10, polyorder=2)
-    ui_sm[0:Nel] = signal.savgol_filter(ui_pre, window_length=10, polyorder=2)
+    #V_sm[0:Nel] = signal.savgol_filter(Vpre, window_length=N, polyorder=3)
+    #ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=N, polyorder=3)
+    #ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=N, polyorder=3)
+    ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=N, polyorder=3)
+    #ui_sm[0:Nel] = signal.savgol_filter(ui_pre, window_length=N, polyorder=3)
+
+    V_sm[0:Nx] = V[0:Nx]
+    ne_sm[0:Nx] = ne[0:Nx]
+    ni_sm[0:Nx] = ni[0:Nx]
+    ui_sm[0:Nx] = ui[0:Nx]
 
     plt.plot(x, V, 'r--')
     plt.plot(x, V_sm, 'r-')
