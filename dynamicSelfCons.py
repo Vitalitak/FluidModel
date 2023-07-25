@@ -585,7 +585,8 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 6
+    Numper = 12 # Number of half periods
+    Step = 500 # Record step
 
     print(Nt)
     print(int((Nper - 2) / w / dt))
@@ -717,7 +718,7 @@ def main():
     Pav = [0 for k in range(0, Nper)]
     time = [dt * k for k in range(0, int(2*Nt+1))]
     """
-
+    """
     VdcRF = np.zeros(int(Numper * Nt + 1))
     Iel = np.zeros(int(Numper * Nt + 1))
     Ii = np.zeros(int(Numper * Nt + 1))
@@ -725,6 +726,15 @@ def main():
     P = np.zeros(int(Numper * Nt + 1))
     Pav = np.zeros(int(Nper))
     time = np.arange(Numper * Nt + 1) * 2 * dt
+    """
+
+    VdcRF = np.zeros(int(Numper * Nt / Step + 1))
+    Iel = np.zeros(int(Numper * Nt / Step + 1))
+    Ii = np.zeros(int(Numper * Nt / Step + 1))
+    VRF = np.zeros(int(Numper * Nt / Step + 1))
+    P = np.zeros(int(Numper * Nt / Step + 1))
+    Pav = np.zeros(int(Nper))
+    time = np.arange(int(Numper * Nt / Step + 1)) * 2 * Step * dt
 
     """
     VdcRF = np.zeros(int(Nt + 1))
@@ -755,10 +765,11 @@ def main():
     VRF[0] = 0
 
     t = 0
-
+    k = 0
     #ue_2 = momentum_e(V, ne, ue, kTe, Nel, Nsh, Nx, dt)
 
     for j in range(1, Numper+1):
+        print(j)
         for i in range(int((j-1)*Nt), int(j*Nt)):
             # print(i)
             t += dt
@@ -811,11 +822,18 @@ def main():
             Ii[int(2 * i)] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
             # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
             """
-
+            """
             VdcRF[i] = q
             VRF[i] = - Arf * m.sin(w * 2 * m.pi * t)
             Iel[i] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
             Ii[i] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
+            """
+            if i == int(k * Step):
+                VdcRF[k] = q
+                VRF[k] = - Arf * m.sin(w * 2 * m.pi * t)
+                Iel[k] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
+                Ii[k] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
+                k += 1
             # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
 
         """
@@ -891,7 +909,7 @@ def main():
         Ii[i] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
     """
 
-    for i in range(0, int(Numper * Nt + 1)):
+    for i in range(0, int(Numper * Nt / Step + 1)):
     #for i in range(0, int(Nt + 1)):
         P[i] = Iel[i] * S * VdcRF[i]
     """
@@ -1000,6 +1018,18 @@ def main():
     plt.plot(x, ue_1, 'b-')
     plt.ylabel('u')
     plt.show()
+
+
+    f = open("VDC.txt", "w")
+    for d in VdcRF:
+        f.write(f"{d}\n")
+    f.close()
+    """
+    f = open("P.txt", "w")
+    for d in Pav:
+        f.write(f"{d}\n")
+    f.close()
+    """
 
     """
     cur = [0 for i in range(0, Nx)]
