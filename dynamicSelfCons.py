@@ -585,7 +585,7 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 3
+    Numper = 6
 
     print(Nt)
     print(int((Nper - 2) / w / dt))
