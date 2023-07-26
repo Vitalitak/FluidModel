@@ -585,8 +585,10 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 60 # Number of half periods
-    Step = 500 # Record step
+    Numper = 80  # Number of half periods
+    Step = 500  # Electrode record step
+    Step2 = 100000  # Distribution record step
+    Numrec = 6  # Number of recorded half period
 
     print(Nt)
     print(int((Nper - 2) / w / dt))
@@ -693,6 +695,8 @@ def main():
             Nel = int(line)
     f6.close()
 
+    file = open("Vt.txt", "w")
+    file.close()
 
 
     x = np.array(x)
@@ -733,7 +737,7 @@ def main():
     Ii = np.zeros(int(Numper * Nt / Step + 1))
     VRF = np.zeros(int(Numper * Nt / Step + 1))
     P = np.zeros(int(Numper * Nt / Step + 1))
-    Pav = np.zeros(int(Nper))
+    Pav = np.zeros(int(Numper))
     time = np.arange(int(Numper * Nt / Step + 1)) * 2 * Step * dt
 
     """
@@ -764,8 +768,9 @@ def main():
     Ii[0] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
     VRF[0] = 0
 
-    t = 0
-    k = 0
+    t = 0 # time
+    k = 0 # electrode record counter
+    p = 0 # distribution record counter
     #ue_2 = momentum_e(V, ne, ue, kTe, Nel, Nsh, Nx, dt)
 
     for j in range(1, Numper+1):
@@ -834,7 +839,14 @@ def main():
                 Iel[k] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
                 Ii[k] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
                 k += 1
-            # print(e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])*dt / C)
+
+            if ((i>=int((Numper-Numrec)*Nt)) and (i == int(p * Step2))):
+                file = open("Vt.txt", "a")
+                for d in V_1:
+                    file.write(f"{d}\n")
+                file.close()
+                p += 1
+
 
         """
         # smoothing
@@ -912,14 +924,7 @@ def main():
     for i in range(0, int(Numper * Nt / Step + 1)):
     #for i in range(0, int(Nt + 1)):
         P[i] = Iel[i] * S * VdcRF[i]
-    """
-    for j in range(0, Nper-1):
-        for i in range(int(j/w/dt), int((j+1)/w/dt)):
-            Pav[j] += 0.5*(P[i]+P[i+1]) * dt
-        Pav[j] = w * Pav[j]
-    """
-    # Pav = Pav * w
-    # print(Pav[Nper-1])
+
     NdV2 = [0 for k in range(0, Nx)]
     dV2 = [0 for k in range(0, Nx)]
 
@@ -1024,12 +1029,17 @@ def main():
     for d in VdcRF:
         f.write(f"{d}\n")
     f.close()
-    """
+
+    for j in range(0, int(Numper / 2)):
+        for i in range(int(j/w/(2 * Step * dt)), int((j+1)/w/(2*Step*dt))):
+            Pav[j] += 0.5*(P[i]+P[i+1]) * 2 * Step * dt
+        Pav[j] = w * Pav[j]
+
+
     f = open("P.txt", "w")
     for d in Pav:
         f.write(f"{d}\n")
     f.close()
-    """
 
     """
     cur = [0 for i in range(0, Nx)]
