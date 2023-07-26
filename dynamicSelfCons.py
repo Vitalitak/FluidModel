@@ -585,7 +585,7 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 12 # Number of half periods
+    Numper = 60 # Number of half periods
     Step = 500 # Record step
 
     print(Nt)
