@@ -585,7 +585,7 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 80  # Number of half periods
+    Numper = 120  # Number of half periods
     Step = 500  # Electrode record step
     Step2 = 100000  # Distribution record step
     Numrec = 6  # Number of recorded half period
@@ -840,7 +840,7 @@ def main():
                 Ii[k] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
                 k += 1
 
-            if ((i>=int((Numper-Numrec)*Nt)) and (i == int(p * Step2))):
+            if ((i>=int((Numper-Numrec)*Nt)) and (i == int((Numper-Numrec)*Nt + p * Step2))):
                 file = open("Vt.txt", "a")
                 for d in V_1:
                     file.write(f"{d}\n")
