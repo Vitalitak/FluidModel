@@ -25,10 +25,18 @@ def main():
 
     f.close()
 
+    plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    plt.rcParams["figure.autolayout"] = True
+    plt.figure()
+    manager = plt.get_current_fig_manager()
+    manager.window.state('zoomed')
+    plt.xlabel('x')
+    plt.ylabel('V')
+
     for i in range(0, int(len(lines)/N)):
         plt.plot(x, Vt[i, ], 'r')
         plt.ylim(-40, 2)
-        plt.pause(0.1)
+        plt.pause(0.15)
         plt.cla()
 
         #time.sleep(0.)
