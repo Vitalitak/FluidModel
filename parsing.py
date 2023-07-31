@@ -25,6 +25,18 @@ def main():
 
     f.close()
 
+    i = 0
+    V = [0 for k in range(0, N)]
+
+    with open("V.txt", "r") as f1:
+        for line in f1.readlines():
+            for ind in line.split():
+                V[i] = float(ind)
+                i += 1
+    f1.close()
+
+    V = np.array(V)
+
     plt.rcParams["figure.figsize"] = [7.00, 3.50]
     plt.rcParams["figure.autolayout"] = True
     plt.figure()
@@ -33,15 +45,21 @@ def main():
     plt.xlabel('x')
     plt.ylabel('V')
 
-    for i in range(0, int(len(lines)/N)):
-        plt.plot(x, Vt[i, ], 'r')
+    for i in range(0, int(len(lines)/N) - 1):
+        plt.plot(x, Vt[i, ], 'r-')
+        plt.plot(x, V, 'r--')
         plt.ylim(-40, 2)
+        plt.grid(axis = 'y')
         plt.pause(0.15)
         plt.cla()
 
         #time.sleep(0.)
     #plt.ylabel('V')
     #plt.xlabel('x')
+    plt.plot(x, Vt[int(len(lines)/N)-1,], 'r-')
+    plt.plot(x, V, 'r--')
+    plt.ylim(-40, 2)
+    plt.grid(axis='y')
     plt.show()
 
     """
