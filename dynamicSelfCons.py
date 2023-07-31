@@ -574,7 +574,7 @@ def main():
     Ti = 0.05  # eV
     n0 = 3E17  # m-3
     Vdc = -12
-    C0 = 3e-6  # F
+    C0 = 2e-6  # F
     S = 1e-2  # m^2 electrode area
     C = C0 / S
     gamma = 5/3
@@ -585,7 +585,7 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 120  # Number of half periods
+    Numper = 110  # Number of half periods
     Step = 500  # Electrode record step
     Step2 = 100000  # Distribution record step
     Numrec = 6  # Number of recorded half period
