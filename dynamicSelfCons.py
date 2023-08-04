@@ -579,13 +579,13 @@ def main():
     C = C0 / S
     gamma = 5/3
     nuiz = 4e5
-    Arf = 16
+    Arf = 17
     w = 13560000  # Hz
 
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 110  # Number of half periods
+    Numper = 4  # Number of half periods
     Step = 500  # Electrode record step
     Step2 = 100000  # Distribution record step
     Numrec = 6  # Number of recorded half period
@@ -609,7 +609,7 @@ def main():
     ue = [0 for k in range(0, Nx)]
 
     i = 0
-
+    """
     with open("V.txt", "r") as f1:
         for line in f1.readlines():
             for ind in line.split():
@@ -648,8 +648,8 @@ def main():
                 i += 1
     f5.close()
     i = 0
-
     """
+
     with open("V_sm.txt", "r") as f1:
         for line in f1.readlines():
             for ind in line.split():
@@ -688,7 +688,7 @@ def main():
                 i += 1
     f5.close()
     i = 0
-    """
+
 
     with open("Nel.txt", "r") as f6:
         for line in f6.readlines():
@@ -763,7 +763,8 @@ def main():
 
 
     q += e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1]) * dt / C
-    VdcRF[0] = q
+    #VdcRF[0] = q
+    VdcRF[0] = V[Nel - 1] - 14.511426 + q
     Iel[0] = e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1])
     Ii[0] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
     VRF[0] = 0
