@@ -585,7 +585,7 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 4  # Number of half periods
+    Numper = 10  # Number of half periods
     Step = 500  # Electrode record step
     Step2 = 100000  # Distribution record step
     Numrec = 6  # Number of recorded half period
@@ -607,6 +607,7 @@ def main():
     ne = [0 for k in range(0, Nx)]
     ui = [0 for k in range(0, Nx)]
     ue = [0 for k in range(0, Nx)]
+    V0 = [0 for k in range(0, Nx)]
 
     i = 0
     """
@@ -650,6 +651,8 @@ def main():
     i = 0
     """
 
+
+    # for calculation after many periods
     with open("V_sm.txt", "r") as f1:
         for line in f1.readlines():
             for ind in line.split():
@@ -695,6 +698,15 @@ def main():
             Nel = int(line)
     f6.close()
 
+
+    with open("V.txt", "r") as f7:
+        for line in f7.readlines():
+            for ind in line.split():
+                V0[i] = float(ind)
+                i += 1
+    f7.close()
+    i = 0
+
     file = open("Vt.txt", "w")
     file.close()
 
@@ -705,6 +717,9 @@ def main():
     ne = np.array(ne)
     ui = np.array(ui)
     ue = np.array(ue)
+    V0 = np.array(V0)
+
+    #print(V[Nel-1])
 
     # dynamic calculations
 
@@ -764,7 +779,7 @@ def main():
 
     q += e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1]) * dt / C
     #VdcRF[0] = q
-    VdcRF[0] = V[Nel - 1] - 14.511426 + q
+    VdcRF[0] = V[Nel - 1] - V0[Nel-1] + q # for calculation after many periods
     Iel[0] = e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1])
     Ii[0] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
     VRF[0] = 0
@@ -772,7 +787,6 @@ def main():
     t = 0 # time
     k = 0 # electrode record counter
     p = 0 # distribution record counter
-    #ue_2 = momentum_e(V, ne, ue, kTe, Nel, Nsh, Nx, dt)
 
     for j in range(1, Numper+1):
         print(j)
@@ -794,20 +808,9 @@ def main():
 
             q += e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])*dt / C
 
-            """
-            VdcRF[int(2 * i - 1)] = q
-            Iel[int(2 * i - 1)] = e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[Nel - 1] * ue_2[Nel - 1])
-            Ii[int(2 * i - 1)] = e * ni_2[Nel - 1] * ui_2[Nel - 1]
-            VRF[int(2 * i - 1)] = - Arf * m.sin(w * 2 * m.pi * t)
-            # print(e * (ni_2[Nel - 1] * ui_2[Nel - 1] - ne_2[0] * m.sqrt(3*kTe / me) / 4 * m.exp(
-            # e * (V_2[Nel - 1] - V_2[0]) / kTe)) * dt / C)
-            """
-
 
             t += dt
             Vel3 = V[Nel - 1] + q - Arf * m.sin(w * 2 * m.pi * t)
-            # Vel3 = V[Nel-1] + q - Arf * m.sin(1e-3 * 2 * m.pi * (2 * i))
-            # Vel3 = V[Nel - 1] + q
 
             V_1 = Pois(ne_2, ni_2, V_2, Vel3, n0, dx, Nel, Nsh, Nx)
             # ui_1 = momentum(V_1, ni_2, ui_2, kTi, kTe, n0, Nel, Nsh, Nx, dt)
@@ -835,7 +838,8 @@ def main():
             Ii[i] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
             """
             if i == int(k * Step):
-                VdcRF[k] = q
+                #VdcRF[k] = q
+                VdcRF[k] = V[Nel - 1] - V0[Nel-1] + q  # for calculation after many periods
                 VRF[k] = - Arf * m.sin(w * 2 * m.pi * t)
                 Iel[k] = e * (ni_1[Nel - 1] * ui_1[Nel - 1] - ne_1[Nel - 1] * ue_1[Nel - 1])
                 Ii[k] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
@@ -849,39 +853,8 @@ def main():
                 p += 1
 
 
-        """
         # smoothing
-        V_sm = np.zeros(Nx)
-        ne_sm = np.zeros(Nx)
-        ni_sm = np.zeros(Nx)
-        ue_sm = np.zeros(Nx)
-        ui_sm = np.zeros(Nx)
-        Nsm = 10
-    
-        Vpre = np.zeros(Nel)
-        ne_pre = np.zeros(Nel)
-        ni_pre = np.zeros(Nel)
-        ue_pre = np.zeros(Nel)
-        ui_pre = np.zeros(Nel)
-        Vpre[0:Nel] = V_1[0:Nel]
-        ne_pre[0:Nel] = ne_1[0:Nel]
-        ni_pre[0:Nel] = ni_1[0:Nel]
-        ue_pre[0:Nel] = ue_1[0:Nel]
-        ui_pre[0:Nel] = ui_1[0:Nel]
-    
-        V_sm[0:Nel] = signal.savgol_filter(Vpre, window_length=Nsm, polyorder=2)
-        ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=Nsm, polyorder=2)
-        ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=Nsm, polyorder=2)
-        ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=Nsm, polyorder=2)
-        ui_sm[0:Nel] = signal.savgol_filter(ui_pre, window_length=Nsm, polyorder=2)
-        
-    
-        V_1 = V_sm
-        ne_1 = ne_sm
-        ni_1 = ni_sm
-        ue_1 = ue_sm
-        ui_1 = ui_sm
-        """
+
         ue_sm = np.zeros(Nx)
         ue_pre = np.zeros(Nel)
         ue_pre[0:Nel] = ue_1[0:Nel]
