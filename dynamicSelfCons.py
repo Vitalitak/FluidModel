@@ -585,7 +585,7 @@ def main():
     #Nt = 15000
     Nt = (int((Nper) / 2 / w / dt))
     Nsm = 8
-    Numper = 10  # Number of half periods
+    Numper = 6  # Number of half periods
     Step = 500  # Electrode record step
     Step2 = 100000  # Distribution record step
     Numrec = 6  # Number of recorded half period
@@ -608,6 +608,7 @@ def main():
     ui = [0 for k in range(0, Nx)]
     ue = [0 for k in range(0, Nx)]
     V0 = [0 for k in range(0, Nx)]
+    #VDCprev = [0 for k in range(0, 110621)]
 
     i = 0
     """
@@ -706,7 +707,15 @@ def main():
                 i += 1
     f7.close()
     i = 0
-
+    """
+    with open("VDC.txt", "r") as f8:
+        for line in f8.readlines():
+            for ind in line.split():
+                VDCprev[i] = float(ind)
+                i += 1
+    f8.close()
+    i = 0
+    """
     file = open("Vt.txt", "w")
     file.close()
 
@@ -718,8 +727,9 @@ def main():
     ui = np.array(ui)
     ue = np.array(ue)
     V0 = np.array(V0)
+    #VDCprev = np.array(VDCprev)
 
-    #print(V[Nel-1])
+    #print(V0[Nel-1])
 
     # dynamic calculations
 
@@ -780,9 +790,12 @@ def main():
     q += e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1]) * dt / C
     #VdcRF[0] = q
     VdcRF[0] = V[Nel - 1] - V0[Nel-1] + q # for calculation after many periods
+    #VdcRF[0] = V[Nel - 1] - V0[Nel - 1]
     Iel[0] = e * (ni_1[Nel - 1] * ui_1[Nel - 1]-ne_1[Nel-1] * ue_1[Nel-1])
     Ii[0] = e * ni_1[Nel - 1] * ui_1[Nel - 1]
     VRF[0] = 0
+    print(V[Nel - 1]- V0[Nel-1]+q)
+    #print(VDCprev[110619])
 
     t = 0 # time
     k = 0 # electrode record counter
@@ -860,6 +873,22 @@ def main():
         ue_pre[0:Nel] = ue_1[0:Nel]
         ue_sm[0:Nel] = signal.savgol_filter(ue_pre, window_length=Nsm, polyorder=3)
         ue_1 = ue_sm
+
+
+        ne_sm = np.zeros(Nx)
+        ni_sm = np.zeros(Nx)
+        ne_pre = np.zeros(Nel)
+        ni_pre = np.zeros(Nel)
+        ne_pre[0:Nel] = ne[0:Nel]
+        ni_pre[0:Nel] = ni[0:Nel]
+        ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=int(Nsm-1), polyorder=3)
+        ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=int(Nsm-1), polyorder=3)
+        ne_sm[0] = ne[0]
+        ni_sm[0] = ni[0]
+        ne_sm[2:Nel] = ne[2:Nel]
+        ni_sm[2:Nel] = ni[2:Nel]
+        ne_1 = ne_sm
+        ni_1 = ni_sm
 
     """
     # next calculation
