@@ -879,14 +879,18 @@ def main():
         ni_sm = np.zeros(Nx)
         ne_pre = np.zeros(Nel)
         ni_pre = np.zeros(Nel)
-        ne_pre[0:Nel] = ne[0:Nel]
-        ni_pre[0:Nel] = ni[0:Nel]
+        ne_pre[0:Nel] = ne_1[0:Nel]
+        ni_pre[0:Nel] = ni_1[0:Nel]
         ne_sm[0:Nel] = signal.savgol_filter(ne_pre, window_length=int(Nsm-1), polyorder=3)
         ni_sm[0:Nel] = signal.savgol_filter(ni_pre, window_length=int(Nsm-1), polyorder=3)
-        ne_sm[0] = ne[0]
-        ni_sm[0] = ni[0]
-        ne_sm[2:Nel] = ne[2:Nel]
-        ni_sm[2:Nel] = ni[2:Nel]
+        ne_sm[0] = ne_1[0]
+        ni_sm[0] = ni_1[0]
+        ne_sm[Nel-4:Nel] = ne_1[Nel-4:Nel]
+        #ne_sm[Nel - 1] = ne[Nel - 1]
+        ni_sm[Nel-1] = ni_1[Nel-1]
+        #ni_sm[Nel-2:Nel] = ni[Nel-2:Nel]
+        #ne_sm[2:Nel] = ne_1[2:Nel]
+        #ni_sm[2:Nel] = ni_1[2:Nel]
         ne_1 = ne_sm
         ni_1 = ni_sm
 

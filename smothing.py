@@ -135,7 +135,9 @@ def main():
     ne_sm[0] = ne[0]
     ni_sm[0] = ni[0]
     ne_sm[Nel-4:Nel] = ne[Nel-4:Nel]
-    ni_sm[Nel-1] = ni[Nel-1]
+    #ne_sm[Nel-1] = ne[Nel-1]
+    ni_sm[Nel - 1] = ni[Nel - 1]
+    #ni_sm[Nel-2:Nel] = ni[Nel-2:Nel]
     #ne_sm[2:Nel] = ne[2:Nel]
     #ni_sm[2:Nel] = ni[2:Nel]
 
